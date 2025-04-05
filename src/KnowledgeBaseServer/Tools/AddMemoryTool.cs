@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text.Json;
 using Dapper;
+using KnowledgeBaseServer.Dtos;
 using ModelContextProtocol.Server;
 
 namespace KnowledgeBaseServer.Tools;
@@ -46,7 +47,8 @@ public static class AddMemoryTool
                     Id = topicId,
                     Created = now,
                     Name = topic,
-                }
+                },
+                transaction
             );
         }
 
@@ -61,7 +63,8 @@ public static class AddMemoryTool
             insert into memory_contexts (id, created, value) values
             (@Id, @Created, @Value)
             """,
-            memoryContext
+            memoryContext,
+            transaction
         );
 
         var createdMemories = memories
@@ -79,7 +82,8 @@ public static class AddMemoryTool
             insert into memories (id, created, topic_id, context_id, content) values
             (@Id, @Created, @TopicId, @ContextId, @Content)
             """,
-            createdMemories
+            createdMemories,
+            transaction
         );
 
         connection.Execute(
@@ -92,7 +96,8 @@ public static class AddMemoryTool
                 m.Id,
                 m.Content,
                 Context = memoryContext.Value,
-            })
+            }),
+            transaction
         );
 
         transaction.Commit();
@@ -103,7 +108,5 @@ public static class AddMemoryTool
         return JsonSerializer.Serialize(response, jsonSerializerOptions);
     }
 }
-
-public sealed record CreatedMemoryDto(Guid Id, string Content);
 
 public sealed record AddMemoriesResponseDto(IReadOnlyCollection<CreatedMemoryDto> Memories);
