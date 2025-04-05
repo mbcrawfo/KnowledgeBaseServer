@@ -43,6 +43,8 @@ builder.Services.AddSingleton(new ConnectionString($"Data Source={databasePath};
 var app = builder.Build();
 
 var appLoggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
+appLoggerFactory.CreateLogger(nameof(Program)).LogInformation("Using database at {Path}", databasePath);
+
 if (!Migrator.InitializeDatabase(appLoggerFactory, databasePath))
 {
     return 1;

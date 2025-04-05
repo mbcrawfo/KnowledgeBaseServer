@@ -15,7 +15,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Migrations\" />
+      <None Remove="Migrations\20250405T1234_InitialMigration.sql" />
+      <EmbeddedResource Include="Migrations\20250405T1234_InitialMigration.sql" />
     </ItemGroup>
 
 </Project>
