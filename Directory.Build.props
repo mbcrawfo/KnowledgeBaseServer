@@ -5,13 +5,23 @@
         <ImplicitUsings>disable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <WarningsNotAsErrors>618</WarningsNotAsErrors>
+
+        <!--
+            S6966 "Use async method on database connection": SQLite does not support async I/O.
+                See https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/async
+        -->
+        <NoWarn>$(NoWarn);S6966</NoWarn>
+
+        <!--
+            CS0618: "Type or member is obsolete": Just because something is obsolete doesn't mean we can stop using it
+                immediately.
+            NU190x: "NuGet audit warnings": Need to know about them, but they should not block the build.
+        -->
+        <WarningsNotAsErrors>$(WarningsNotAsErrors);CS0618;NU1901;NU1092;NU1903;NU1904</WarningsNotAsErrors>
 
         <Copyright>Copyright © $([System.DateTime]::Now.ToString('yyyy')) Michael Crawford</Copyright>
         <AssemblyVersion>1.0.0.0</AssemblyVersion>
         <InformationalVersion>1.0.0.0</InformationalVersion>
-
-        <NuGetAudit>false</NuGetAudit>
     </PropertyGroup>
 
     <ItemGroup>
