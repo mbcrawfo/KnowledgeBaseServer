@@ -35,4 +35,22 @@ public static partial class DbConnectionExtensions
     }
 
     public static void SeedTopic(this IDbConnection connection, Topic topic) => connection.SeedTopics([topic]);
+
+    public static IReadOnlyList<Topic> GetTopics(
+        this IDbConnection connection,
+        string? where = null,
+        object? param = null
+    )
+    {
+        var sql = """
+            select id, created, name
+            from topics
+            """;
+        if (where is not null)
+        {
+            sql += "\n where " + where;
+        }
+
+        return connection.Query<Topic>(sql, param).AsList();
+    }
 }

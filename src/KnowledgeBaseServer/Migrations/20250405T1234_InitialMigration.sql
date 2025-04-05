@@ -4,10 +4,10 @@ create table topics(
     name text not null unique
 );
 
-create table memory_context(
+create table memory_contexts(
     id text primary key,
     created text not null,
-    value text not null unique
+    value text not null
 );
 
 create table memories(
@@ -19,7 +19,7 @@ create table memories(
     replaced_by_memory_id text,
 
     foreign key(topic_id) references topics(id),
-    foreign key(context_id) references memory_context(id),
+    foreign key(context_id) references memory_contexts(id),
     foreign key(replaced_by_memory_id) references memories(id)
 );
 
@@ -40,4 +40,4 @@ create table memory_links(
 create index idx_memory_links_from_memory_id on memory_links(from_memory_id);
 create index idx_memory_links_to_memory_id on memory_links(to_memory_id);
 
-create virtual table memory_search using fts5(content, context, id unindexed, tokenize=porter);
+create virtual table memory_search using fts5(id unindexed, content, context, tokenize=porter);

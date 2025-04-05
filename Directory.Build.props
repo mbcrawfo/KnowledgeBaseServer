@@ -16,8 +16,9 @@
             CS0618: "Type or member is obsolete": Just because something is obsolete doesn't mean we can stop using it
                 immediately.
             NU190x: "NuGet audit warnings": Need to know about them, but they should not block the build.
+            S125: "Code should not be commented out": Makes it very annoying to test and develop iteratively.
         -->
-        <WarningsNotAsErrors>$(WarningsNotAsErrors);CS0618;NU1901;NU1092;NU1903;NU1904</WarningsNotAsErrors>
+        <WarningsNotAsErrors>$(WarningsNotAsErrors);CS0618;NU1901;NU1092;NU1903;NU1904;S125</WarningsNotAsErrors>
 
         <Copyright>Copyright © $([System.DateTime]::Now.ToString('yyyy')) Michael Crawford</Copyright>
         <AssemblyVersion>1.0.0.0</AssemblyVersion>

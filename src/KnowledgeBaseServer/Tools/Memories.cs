@@ -1,0 +1,109 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text.Json;
+using Dapper;
+using ModelContextProtocol.Server;
+
+namespace KnowledgeBaseServer.Tools;
+
+[McpServerToolType]
+public static class Memories
+{
+    [McpServerTool(Name = "AddMemories", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false)]
+    [Description("Store memories in the knowledge base.")]
+    public static string AddMemories(
+        [Description("The topic of the memories.")] string topic,
+        [Description("The text of the memories.")] string[] memories,
+        [Description("Context information for the memories.")] string context,
+        ConnectionString connectionString,
+        JsonSerializerOptions jsonSerializerOptions
+    )
+    {
+        var now = DateTimeOffset.UtcNow;
+        using var connection = connectionString.CreateConnection();
+        using var transaction = connection.BeginTransaction();
+
+        var topicId = connection.QuerySingleOrDefault<Guid>(
+            sql: """
+            select id
+            from topics
+            where name = @Name
+            """,
+            new { Name = topic }
+        );
+        if (topicId == Guid.Empty)
+        {
+            topicId = Guid.CreateVersion7();
+            connection.Execute(
+                sql: """
+                insert into topics (id, created, name) values
+                (@Id, @Created, @Name)
+                """,
+                new
+                {
+                    Id = topicId,
+                    Created = now,
+                    Name = topic,
+                }
+            );
+        }
+
+        var memoryContext = new
+        {
+            Id = Guid.CreateVersion7(),
+            Created = now,
+            Value = context,
+        };
+        connection.Execute(
+            sql: """
+            insert into memory_contexts (id, created, value) values
+            (@Id, @Created, @Value)
+            """,
+            memoryContext
+        );
+
+        var createdMemories = memories
+            .Select(m => new
+            {
+                Id = Guid.CreateVersion7(),
+                Created = now,
+                TopicId = topicId,
+                ContextId = memoryContext.Id,
+                Content = m,
+            })
+            .ToArray();
+        connection.Execute(
+            sql: """
+            insert into memories (id, created, topic_id, context_id, content) values
+            (@Id, @Created, @TopicId, @ContextId, @Content)
+            """,
+            createdMemories
+        );
+
+        connection.Execute(
+            sql: """
+            insert into memory_search (id, content, context) values
+            (@Id, @Content, @Context)
+            """,
+            createdMemories.Select(m => new
+            {
+                m.Id,
+                m.Content,
+                Context = memoryContext.Value,
+            })
+        );
+
+        transaction.Commit();
+
+        var response = new AddMemoriesResponseDto(
+            createdMemories.Select(m => new CreatedMemoryDto(m.Id, m.Content)).ToArray()
+        );
+        return JsonSerializer.Serialize(response, jsonSerializerOptions);
+    }
+}
+
+public sealed record CreatedMemoryDto(Guid Id, string Content);
+
+public sealed record AddMemoriesResponseDto(IReadOnlyCollection<CreatedMemoryDto> Memories);

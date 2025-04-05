@@ -12,7 +12,9 @@ namespace KnowledgeBaseServer.Tests;
 )]
 public abstract class DatabaseTest : IDisposable
 {
-    private readonly string _fileName = $"{Guid.NewGuid()}.sqlite";
+    private static int _counter = 1;
+
+    private readonly string _fileName = $"testdb{_counter++}.sqlite";
 
     protected DatabaseTest()
     {
