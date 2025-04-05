@@ -8,7 +8,7 @@ using ModelContextProtocol.Server;
 namespace KnowledgeBaseServer.Tools;
 
 [McpServerToolType]
-public static class Topics
+public static class GetTopicsTool
 {
     [McpServerTool(Name = "GetTopics", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false)]
     [Description("Lists all topics in the knowledge base.")]

@@ -9,7 +9,7 @@ using ModelContextProtocol.Server;
 namespace KnowledgeBaseServer.Tools;
 
 [McpServerToolType]
-public static class Memories
+public static class AddMemoryTool
 {
     [McpServerTool(Name = "AddMemories", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false)]
     [Description("Store memories in the knowledge base.")]

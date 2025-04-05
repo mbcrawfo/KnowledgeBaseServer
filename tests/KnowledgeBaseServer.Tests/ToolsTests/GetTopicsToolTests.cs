@@ -8,7 +8,7 @@ using Xunit;
 
 namespace KnowledgeBaseServer.Tests.ToolsTests;
 
-public class TopicsTests : DatabaseTest
+public class GetTopicsToolTests : DatabaseTest
 {
     private readonly Faker<Topic> _topicFaker = Topic.Faker();
 
@@ -25,7 +25,7 @@ public class TopicsTests : DatabaseTest
         var expected = topics.Select(t => t.Name).Order().ToArray();
 
         // act
-        var result = Topics.GetTopics(ConnectionString, JsonSerializerOptions.Default);
+        var result = GetTopicsTool.GetTopics(ConnectionString, JsonSerializerOptions.Default);
         var actual = JsonSerializer.Deserialize<TopicsResponseDto>(result);
 
         // assert

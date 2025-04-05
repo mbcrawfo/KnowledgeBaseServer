@@ -8,7 +8,7 @@ using Xunit;
 
 namespace KnowledgeBaseServer.Tests.ToolsTests;
 
-public class MemoriesTests : DatabaseTest
+public class AddMemoryToolTests : DatabaseTest
 {
     private readonly Faker _faker = new();
     private readonly Faker<Topic> _topicFaker = Topic.Faker();
@@ -22,7 +22,7 @@ public class MemoriesTests : DatabaseTest
         var expectedContext = _faker.Lorem.Sentence();
 
         // act
-        _ = Memories.AddMemories(
+        _ = AddMemoryTool.AddMemories(
             expectedTopic.Name,
             [expectedMemory],
             expectedContext,
@@ -64,7 +64,7 @@ public class MemoriesTests : DatabaseTest
         var expectedContext = _faker.Lorem.Sentence();
 
         // act
-        _ = Memories.AddMemories(
+        _ = AddMemoryTool.AddMemories(
             expectedTopic.Name,
             [expectedMemory],
             expectedContext,
@@ -106,7 +106,7 @@ public class MemoriesTests : DatabaseTest
         var context = _faker.Lorem.Sentence();
 
         // act
-        var result = Memories.AddMemories(
+        var result = AddMemoryTool.AddMemories(
             topic.Name,
             [memories],
             context,
