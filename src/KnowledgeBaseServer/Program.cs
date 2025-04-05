@@ -1,22 +1,29 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using Dapper;
-using Microsoft.Data.Sqlite;
+using KnowledgeBaseServer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+if (
+    Environment.GetEnvironmentVariable("LOG_LEVEL") is not { } logLevelString
+    || !Enum.TryParse<LogLevel>(logLevelString, out var logLevel)
+)
+{
+    logLevel = LogLevel.Information;
+}
+
 if (args is ["--init-db", ..])
 {
-    if (args is not ["--init-db", _])
+    if (args is not ["--init-db", var path])
     {
         Console.WriteLine("Usage: dotnet run --init-db <path>");
         return 1;
     }
 
-    // Initialize the database at the specified path
-    return 0;
+    var initLoggerFactory = LoggerFactory.Create(builder => builder.AddConsole().SetMinimumLevel(logLevel));
+    return Migrator.InitializeDatabase(initLoggerFactory, path) ? 0 : 1;
 }
 
 var databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME") ?? "default.sqlite";
@@ -27,30 +34,19 @@ var defaultPath = Path.Combine(
 );
 var databasePath = Environment.GetEnvironmentVariable("DATABASE_PATH") ?? defaultPath;
 
-if (Path.GetDirectoryName(databasePath) is { Length: > 0 } directory && !Directory.Exists(directory))
-{
-    Directory.CreateDirectory(directory);
-}
-
-var connectionString = $"Data Source={Path.Join(databasePath, databaseName)};";
-
-try
-{
-    using var connection = new SqliteConnection(connectionString);
-    connection.Open();
-    connection.Execute("PRAGMA journal_mode=WAL;");
-}
-catch (Exception e)
-{
-    await Console.Error.WriteLineAsync($"Failed to open or create the database. {e.GetType().Name}: {e.Message}");
-}
-
 var builder = Host.CreateApplicationBuilder(args);
 builder.Logging.AddConsole(options => options.LogToStandardErrorThreshold = LogLevel.Trace);
 
 builder.Services.AddMcpServer().WithStdioServerTransport().WithPromptsFromAssembly().WithToolsFromAssembly();
+builder.Services.AddSingleton(new ConnectionString($"Data Source={databasePath};"));
 
 var app = builder.Build();
+
+var appLoggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
+if (!Migrator.InitializeDatabase(appLoggerFactory, databasePath))
+{
+    return 1;
+}
 
 using var cancellationTokenSource = new CancellationTokenSource();
 Console.CancelKeyPress += (_, eventArgs) =>

@@ -14,4 +14,8 @@
       <PackageReference Include="ModelContextProtocol" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Migrations\" />
+    </ItemGroup>
+
 </Project>
