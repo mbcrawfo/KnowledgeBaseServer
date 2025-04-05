@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text.Json;
 using System.Threading;
 using KnowledgeBaseServer;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,6 +40,7 @@ builder.Logging.AddConsole(options => options.LogToStandardErrorThreshold = LogL
 
 builder.Services.AddMcpServer().WithStdioServerTransport().WithPromptsFromAssembly().WithToolsFromAssembly();
 builder.Services.AddSingleton(new ConnectionString($"Data Source={databasePath};"));
+builder.Services.AddSingleton(new JsonSerializerOptions(JsonSerializerDefaults.Web) { WriteIndented = true });
 
 var app = builder.Build();
 

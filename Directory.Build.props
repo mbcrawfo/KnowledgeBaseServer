@@ -25,6 +25,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="JetBrains.Annotations" />
         <PackageReference Include="Roslynator.Analyzers">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
