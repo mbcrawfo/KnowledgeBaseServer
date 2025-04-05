@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6524429B-1313-4526-852D-13360071F3B5}"
+	ProjectSection(SolutionItems) = preProject
+		.csharpierrc = .csharpierrc
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2162A920-E15A-42C5-8CF0-E066D886D1B1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{BEAF6947-664D-482B-A921-6A62C1FF6C7D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KnowledgeBaseServer", "src\KnowledgeBaseServer\KnowledgeBaseServer.csproj", "{504879A5-5047-4A35-A3B7-A15CC46B041D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KnowledgeBaseServer.Tests", "tests\KnowledgeBaseServer.Tests\KnowledgeBaseServer.Tests.csproj", "{1BCEA64D-CF95-45B9-B5C1-47D0DDAF8CEF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{504879A5-5047-4A35-A3B7-A15CC46B041D} = {2162A920-E15A-42C5-8CF0-E066D886D1B1}
+		{1BCEA64D-CF95-45B9-B5C1-47D0DDAF8CEF} = {BEAF6947-664D-482B-A921-6A62C1FF6C7D}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{504879A5-5047-4A35-A3B7-A15CC46B041D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{504879A5-5047-4A35-A3B7-A15CC46B041D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{504879A5-5047-4A35-A3B7-A15CC46B041D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{504879A5-5047-4A35-A3B7-A15CC46B041D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BCEA64D-CF95-45B9-B5C1-47D0DDAF8CEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BCEA64D-CF95-45B9-B5C1-47D0DDAF8CEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BCEA64D-CF95-45B9-B5C1-47D0DDAF8CEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BCEA64D-CF95-45B9-B5C1-47D0DDAF8CEF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

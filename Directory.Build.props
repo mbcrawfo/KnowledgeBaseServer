@@ -1,0 +1,27 @@
+<Project>
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <LangVersion>13</LangVersion>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <WarningsNotAsErrors>618</WarningsNotAsErrors>
+
+        <Copyright>Copyright © $([System.DateTime]::Now.ToString('yyyy')) Michael Crawford</Copyright>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+        <InformationalVersion>1.0.0.0</InformationalVersion>
+
+        <NuGetAudit>false</NuGetAudit>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Roslynator.Analyzers">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="SonarAnalyzer.CSharp">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+</Project>

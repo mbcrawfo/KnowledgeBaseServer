@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Dapper" />
+      <PackageReference Include="dbup-sqlite" />
+      <PackageReference Include="Microsoft.Data.Sqlite" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" />
+      <PackageReference Include="Microsoft.Extensions.Logging" />
+      <PackageReference Include="ModelContextProtocol" />
+    </ItemGroup>
+
+</Project>
