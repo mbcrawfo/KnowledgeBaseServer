@@ -45,8 +45,8 @@ public static partial class DbConnectionExtensions
     {
         connection.Execute(
             """
-            insert into memories (id, topic_id, context_id, content, replaced_by_memory_id)
-            values (@Id, @TopicId, @ContextId, @Content, @ReplacedByMemoryId)
+            insert into memories (id, created, topic_id, context_id, content, replaced_by_memory_id)
+            values (@Id, @Created, @TopicId, @ContextId, @Content, @ReplacedByMemoryId)
             """,
             memories
         );
@@ -61,7 +61,7 @@ public static partial class DbConnectionExtensions
     )
     {
         var sql = """
-            select id, topic_id, context_id, content, replaced_by_memory_id
+            select id, created, topic_id, context_id, content, replaced_by_memory_id
             from memories
             """;
         if (where is not null)

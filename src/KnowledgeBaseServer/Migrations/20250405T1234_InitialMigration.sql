@@ -28,16 +28,15 @@ create index idx_memories_context_id on memories(context_id);
 create index idx_memories_replaced_by_memory_id on memories(replaced_by_memory_id);
 
 create table memory_links(
-    id text primary key,
-    created text not null,
     from_memory_id text not null,
     to_memory_id text not null,
+    created text not null,
 
+    primary key (from_memory_id, to_memory_id),
     foreign key(from_memory_id) references memories(id),
     foreign key(to_memory_id) references memories(id)
 );
 
-create index idx_memory_links_from_memory_id on memory_links(from_memory_id);
 create index idx_memory_links_to_memory_id on memory_links(to_memory_id);
 
 create virtual table memory_search using fts5(id unindexed, content, context, tokenize=porter);

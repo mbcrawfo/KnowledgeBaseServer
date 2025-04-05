@@ -6,7 +6,7 @@ using KnowledgeBaseServer.Tools;
 using Shouldly;
 using Xunit;
 
-namespace KnowledgeBaseServer.Tests.ToolsTests;
+namespace KnowledgeBaseServer.Tests.Tools;
 
 public class AddMemoryToolTests : DatabaseTest
 {

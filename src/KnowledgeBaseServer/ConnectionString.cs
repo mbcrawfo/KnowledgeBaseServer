@@ -10,6 +10,7 @@ public sealed record ConnectionString(string Value)
     // registered in both places before any queries run.
     static ConnectionString()
     {
+        DefaultTypeMap.MatchNamesWithUnderscores = true;
         SqlMapper.AddTypeHandler(new GuidTypeHandler());
         SqlMapper.AddTypeHandler(new DateTimeOffsetTypeHandler());
     }
