@@ -39,4 +39,4 @@ create table memory_links(
 
 create index idx_memory_links_to_memory_id on memory_links(to_memory_id);
 
-create virtual table memory_search using fts5(id unindexed, content, context, tokenize=porter);
+create virtual table memory_search using fts5(memory_id unindexed, content, context, tokenize=porter);

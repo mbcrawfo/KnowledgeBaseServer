@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Text.Json;
 using Bogus;
+using Dapper;
 using KnowledgeBaseServer.Dtos;
 using KnowledgeBaseServer.Tests.Data;
 using KnowledgeBaseServer.Tools;
@@ -115,6 +116,55 @@ public class UpdateMemoryToolTests : DatabaseTest
             () => actualContexts.Count.ShouldBe(2),
             () => actualContexts.First(c => c.Id != previousMemory.ContextId).Value.ShouldBe(expectedContext)
         );
+    }
+
+    [Fact]
+    public void UpdateMemory_ShouldUpdateSearchIndex()
+    {
+        // arrange
+        var topic = _topicFaker.Generate();
+        var context = _memoryContextFaker.Generate();
+        var previousMemory = _memoryFaker.WithTopic(topic).WithContext(context).Generate();
+
+        using (var seedConnection = ConnectionString.CreateConnection())
+        {
+            seedConnection.SeedTopic(topic);
+            seedConnection.SeedMemoryContext(context);
+            seedConnection.SeedMemory(previousMemory);
+        }
+
+        var expectedMemory = _faker.Lorem.Sentence();
+        var searchWord = _faker.PickRandom(expectedMemory.Split(' '));
+
+        // act
+        _ = UpdateMemoryTool.UpdateMemory(
+            previousMemory.Id,
+            expectedMemory,
+            context.Value,
+            ConnectionString,
+            JsonSerializerOptions.Default
+        );
+
+        using var connection = ConnectionString.CreateConnection();
+        var memorySearches = connection
+            .Query<MemorySearch>(
+                """
+                select memory_id, content, context
+                from memory_search
+                where content match @Word and memory_id <> @MemoryId
+                """,
+                new { Word = searchWord, MemoryId = previousMemory.Id }
+            )
+            .AsList();
+
+        // assert
+        memorySearches
+            .ShouldNotBeNull()
+            .ShouldHaveSingleItem()
+            .ShouldSatisfyAllConditions(
+                () => memorySearches[0].Content.ShouldBe(expectedMemory),
+                () => memorySearches[0].Context.ShouldBe(context.Value)
+            );
     }
 
     [Fact]

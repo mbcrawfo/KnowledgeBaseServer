@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Text.Json;
 using Bogus;
+using Dapper;
 using KnowledgeBaseServer.Dtos;
 using KnowledgeBaseServer.Tests.Data;
 using KnowledgeBaseServer.Tools;
@@ -18,13 +19,13 @@ public class AddMemoryToolTests : DatabaseTest
     public void AddMemories_ShouldCreateTopicAndMemory_WhenTopicDoesNotExist()
     {
         // arrange
-        var expectedTopic = _topicFaker.Generate();
+        var expectedTopic = _faker.Lorem.Sentence();
         var expectedMemory = _faker.Lorem.Sentence();
         var expectedContext = _faker.Lorem.Sentence();
 
         // act
         _ = AddMemoryTool.AddMemories(
-            expectedTopic.Name,
+            expectedTopic,
             [expectedMemory],
             expectedContext,
             ConnectionString,
@@ -39,7 +40,7 @@ public class AddMemoryToolTests : DatabaseTest
         // assert
         actualTopics.ShouldSatisfyAllConditions(
             () => actualTopics.ShouldHaveSingleItem(),
-            () => actualTopics[0].Name.ShouldBe(expectedTopic.Name)
+            () => actualTopics[0].Name.ShouldBe(expectedTopic)
         );
         actualMemories.ShouldSatisfyAllConditions(
             () => actualMemories.ShouldHaveSingleItem(),
@@ -91,6 +92,47 @@ public class AddMemoryToolTests : DatabaseTest
             () => actualContexts.ShouldHaveSingleItem(),
             () => actualContexts[0].Value.ShouldBe(expectedContext)
         );
+    }
+
+    [Fact]
+    public void AddMemories_ShouldUpdateSearchIndex()
+    {
+        // arrange
+        var topic = _faker.Lorem.Sentence();
+        var expectedMemory = _faker.Lorem.Sentence();
+        var expectedContext = _faker.Lorem.Sentence();
+
+        var searchWord = _faker.PickRandom(expectedMemory.Split(' '));
+
+        // act
+        _ = AddMemoryTool.AddMemories(
+            topic,
+            [expectedMemory],
+            expectedContext,
+            ConnectionString,
+            JsonSerializerOptions.Default
+        );
+
+        using var connection = ConnectionString.CreateConnection();
+        var memorySearches = connection
+            .Query<MemorySearch>(
+                """
+                select memory_id, content, context
+                from memory_search
+                where content match @Word
+                """,
+                new { Word = searchWord }
+            )
+            .AsList();
+
+        // assert
+        memorySearches
+            .ShouldNotBeNull()
+            .ShouldHaveSingleItem()
+            .ShouldSatisfyAllConditions(
+                () => memorySearches[0].Content.ShouldBe(expectedMemory),
+                () => memorySearches[0].Context.ShouldBe(expectedContext)
+            );
     }
 
     [Fact]

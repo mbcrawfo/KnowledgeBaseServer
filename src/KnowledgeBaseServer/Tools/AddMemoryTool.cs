@@ -88,12 +88,12 @@ public static class AddMemoryTool
 
         connection.Execute(
             sql: """
-            insert into memory_search (id, content, context) values
-            (@Id, @Content, @Context)
+            insert into memory_search (memory_id, content, context) values
+            (@MemoryId, @Content, @Context)
             """,
             createdMemories.Select(m => new
             {
-                m.Id,
+                MemoryId = m.Id,
                 m.Content,
                 Context = memoryContext.Value,
             }),

@@ -78,6 +78,20 @@ public static class UpdateMemoryTool
 
         connection.Execute(
             sql: """
+            insert into memory_search (memory_id, content, context) values
+            (@MemoryId, @Content, @Context)
+            """,
+            new
+            {
+                MemoryId = createdMemory.Id,
+                createdMemory.Content,
+                Context = context,
+            },
+            transaction
+        );
+
+        connection.Execute(
+            sql: """
             update memories
             set replaced_by_memory_id = @ReplacedByMemoryId
             where id = @Id
