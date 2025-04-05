@@ -26,9 +26,9 @@ public static class Topics
             """
         );
 
-        var response = new TopicsResponse(topics.AsList());
+        var response = new TopicsResponseDto(topics.AsList());
         return JsonSerializer.Serialize(response, jsonSerializerOptions);
     }
-
-    private sealed record TopicsResponse(IReadOnlyCollection<string> Topics);
 }
+
+public sealed record TopicsResponseDto(IReadOnlyCollection<string> Topics);

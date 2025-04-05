@@ -24,7 +24,12 @@ if (args is ["--init-db", ..])
     }
 
     var initLoggerFactory = LoggerFactory.Create(builder => builder.AddConsole().SetMinimumLevel(logLevel));
-    return Migrator.InitializeDatabase(initLoggerFactory, path) ? 0 : 1;
+    if (!Migrator.InitializeDatabase(initLoggerFactory, path))
+    {
+        return 1;
+    }
+
+    return Migrator.InitializeDatabase(initLoggerFactory, $"Data Source={path}") ? 0 : 1;
 }
 
 var databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME") ?? "default.sqlite";
@@ -34,12 +39,13 @@ var defaultPath = Path.Combine(
     databaseName
 );
 var databasePath = Environment.GetEnvironmentVariable("DATABASE_PATH") ?? defaultPath;
+var connectionString = ConnectionString.Create(databasePath);
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Logging.AddConsole(options => options.LogToStandardErrorThreshold = LogLevel.Trace);
 
 builder.Services.AddMcpServer().WithStdioServerTransport().WithPromptsFromAssembly().WithToolsFromAssembly();
-builder.Services.AddSingleton(new ConnectionString($"Data Source={databasePath};"));
+builder.Services.AddSingleton(connectionString);
 builder.Services.AddSingleton(new JsonSerializerOptions(JsonSerializerDefaults.Web) { WriteIndented = true });
 
 var app = builder.Build();
@@ -47,7 +53,10 @@ var app = builder.Build();
 var appLoggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
 appLoggerFactory.CreateLogger(nameof(Program)).LogInformation("Using database at {Path}", databasePath);
 
-if (!Migrator.InitializeDatabase(appLoggerFactory, databasePath))
+if (
+    !Migrator.InitializeDatabase(appLoggerFactory, databasePath)
+    || !Migrator.ApplyMigrations(appLoggerFactory, connectionString)
+)
 {
     return 1;
 }

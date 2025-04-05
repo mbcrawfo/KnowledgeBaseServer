@@ -13,4 +13,6 @@ public sealed record ConnectionString(string Value)
         connection.Execute("PRAGMA foreign_keys = ON;");
         return connection;
     }
+
+    public static ConnectionString Create(string path) => new($"Data Source={path};");
 }

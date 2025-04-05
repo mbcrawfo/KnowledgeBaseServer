@@ -3,7 +3,6 @@ using System.IO;
 using System.Reflection;
 using Dapper;
 using DbUp;
-using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 
 namespace KnowledgeBaseServer;
@@ -12,10 +11,15 @@ public static class Migrator
 {
     private static readonly Assembly MigrationsAssembly = typeof(Migrator).Assembly;
 
+    /// <summary>
+    ///     Creates the database path and file if they do not exist, and puts the database in WAL mode.
+    /// </summary>
+    /// <param name="loggerFactory"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
     public static bool InitializeDatabase(ILoggerFactory loggerFactory, string path)
     {
         var logger = loggerFactory.CreateLogger(nameof(Migrator));
-        var connectionString = $"Data Source={path};";
 
         try
         {
@@ -24,18 +28,28 @@ public static class Migrator
                 Directory.CreateDirectory(directory);
             }
 
-            using var connection = new SqliteConnection(connectionString);
-            connection.Open();
+            using var connection = ConnectionString.Create(path).CreateConnection();
             connection.Execute("PRAGMA journal_mode=WAL;");
+            return true;
         }
         catch (Exception e)
         {
             logger.LogCritical(e, "Failed to initialize database");
             return false;
         }
+    }
 
+    /// <summary>
+    ///     Applies the migrations to the database.
+    /// </summary>
+    /// <param name="loggerFactory"></param>
+    /// <param name="connectionString"></param>
+    /// <returns></returns>
+    public static bool ApplyMigrations(ILoggerFactory loggerFactory, ConnectionString connectionString)
+    {
+        var logger = loggerFactory.CreateLogger(nameof(Migrator));
         var migrator = DeployChanges
-            .To.SqliteDatabase(connectionString)
+            .To.SqliteDatabase(connectionString.Value)
             .WithScriptsEmbeddedInAssembly(
                 MigrationsAssembly,
                 name => name.StartsWith("KnowledgeBaseServer.Migrations.") && name.EndsWith(".sql")
