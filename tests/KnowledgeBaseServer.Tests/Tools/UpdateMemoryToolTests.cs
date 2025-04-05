@@ -134,7 +134,7 @@ public class UpdateMemoryToolTests : DatabaseTest
         }
 
         var expectedMemory = _faker.Lorem.Sentence();
-        var searchWord = _faker.PickRandom(expectedMemory.Split(' '));
+        var searchWord = _faker.PickRandom(expectedMemory.Split(' ')).RemovePunctuation();
 
         // act
         _ = UpdateMemoryTool.UpdateMemory(

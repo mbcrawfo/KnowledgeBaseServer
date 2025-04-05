@@ -102,7 +102,7 @@ public class AddMemoryToolTests : DatabaseTest
         var expectedMemory = _faker.Lorem.Sentence();
         var expectedContext = _faker.Lorem.Sentence();
 
-        var searchWord = _faker.PickRandom(expectedMemory.Split(' '));
+        var searchWord = _faker.PickRandom(expectedMemory.Split(' ')).RemovePunctuation();
 
         // act
         _ = AddMemoryTool.AddMemories(
