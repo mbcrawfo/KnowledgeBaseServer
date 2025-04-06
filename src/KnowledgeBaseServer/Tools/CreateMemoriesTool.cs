@@ -9,10 +9,16 @@ using ModelContextProtocol.Server;
 namespace KnowledgeBaseServer.Tools;
 
 [McpServerToolType]
-public static class AddMemoriesTool
+public static class CreateMemoriesTool
 {
-    [McpServerTool(Name = "AddMemories", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false)]
-    [Description("Adds memories to the knowledge base.")]
+    [McpServerTool(
+        Name = "CreateMemories",
+        ReadOnly = false,
+        Destructive = false,
+        Idempotent = false,
+        OpenWorld = false
+    )]
+    [Description("Create new memories in the knowledge base.")]
     public static string Handle(
         ConnectionString connectionString,
         JsonSerializerOptions jsonSerializerOptions,

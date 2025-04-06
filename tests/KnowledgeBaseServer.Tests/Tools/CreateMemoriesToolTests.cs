@@ -10,7 +10,7 @@ using Xunit;
 
 namespace KnowledgeBaseServer.Tests.Tools;
 
-public class AddMemoriesToolTests : DatabaseTest
+public class CreateMemoriesToolTests : DatabaseTest
 {
     private readonly Faker _faker = new();
     private readonly Faker<Topic> _topicFaker = Topic.Faker();
@@ -24,7 +24,7 @@ public class AddMemoriesToolTests : DatabaseTest
         var expectedContext = _faker.Lorem.Sentence();
 
         // act
-        _ = AddMemoriesTool.Handle(
+        _ = CreateMemoriesTool.Handle(
             ConnectionString,
             JsonSerializerOptions.Default,
             expectedTopic,
@@ -53,7 +53,7 @@ public class AddMemoriesToolTests : DatabaseTest
         var expectedContext = _faker.Lorem.Sentence();
 
         // act
-        _ = AddMemoriesTool.Handle(
+        _ = CreateMemoriesTool.Handle(
             ConnectionString,
             JsonSerializerOptions.Default,
             expectedTopic.Name,
@@ -77,7 +77,7 @@ public class AddMemoriesToolTests : DatabaseTest
 
         // act
 
-        _ = AddMemoriesTool.Handle(ConnectionString, JsonSerializerOptions.Default, topic, [expectedMemory]);
+        _ = CreateMemoriesTool.Handle(ConnectionString, JsonSerializerOptions.Default, topic, [expectedMemory]);
 
         // assert
         using var connection = ConnectionString.CreateConnection();
@@ -97,7 +97,7 @@ public class AddMemoriesToolTests : DatabaseTest
         var searchWord = _faker.PickRandom(expectedMemory.Split(' ')).RemovePunctuation();
 
         // act
-        _ = AddMemoriesTool.Handle(
+        _ = CreateMemoriesTool.Handle(
             ConnectionString,
             JsonSerializerOptions.Default,
             topic,
@@ -142,7 +142,7 @@ public class AddMemoriesToolTests : DatabaseTest
 
         // act
         var actualMemories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            AddMemoriesTool.Handle(ConnectionString, JsonSerializerOptions.Default, topic.Name, [memories], context)
+            CreateMemoriesTool.Handle(ConnectionString, JsonSerializerOptions.Default, topic.Name, [memories], context)
         );
 
         using var connection = ConnectionString.CreateConnection();

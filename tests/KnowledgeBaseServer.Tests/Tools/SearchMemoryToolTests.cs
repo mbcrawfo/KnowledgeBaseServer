@@ -70,7 +70,7 @@ public class SearchMemoryToolTests : DatabaseTest
         var searchPhrase = _faker.PickRandom(content.Split(' '));
 
         var memories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            AddMemoriesTool.Handle(ConnectionString, JsonSerializerOptions.Default, topic, [content], context)
+            CreateMemoriesTool.Handle(ConnectionString, JsonSerializerOptions.Default, topic, [content], context)
         );
         Debug.Assert(memories is not null);
         var expected = JsonSerializer.Deserialize<MemoryDto>(
@@ -99,7 +99,7 @@ public class SearchMemoryToolTests : DatabaseTest
                 .Range(start: 0, count: 3)
                 .Select(_ => _faker.Lorem.Sentence() + searchPhrase)
                 .ToArray();
-            _ = AddMemoriesTool.Handle(
+            _ = CreateMemoriesTool.Handle(
                 ConnectionString,
                 JsonSerializerOptions.Default,
                 topic,
@@ -129,7 +129,7 @@ public class SearchMemoryToolTests : DatabaseTest
             .Select(_ => _faker.Lorem.Sentence() + searchPhrase)
             .ToArray();
 
-        _ = AddMemoriesTool.Handle(
+        _ = CreateMemoriesTool.Handle(
             ConnectionString,
             JsonSerializerOptions.Default,
             _faker.Lorem.Word(),
