@@ -51,7 +51,7 @@ public static class SearchMemoryTool
               from memory_search
               where memory_search match @Phrases
             )
-            select m.id, m.created, t.name as topic, m.content, mc.value as context, replaced_by_memory_id
+            select m.id, m.created, t.name as topic, m.content, mc.value as context
             from search_results sr
             inner join memories m on m.id = sr.memory_id
             inner join topics t on t.id = m.topic_id

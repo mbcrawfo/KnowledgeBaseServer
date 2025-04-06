@@ -14,11 +14,13 @@ public sealed class Memory
 
     public required Guid TopicId { get; init; }
 
-    public required Guid ContextId { get; init; }
+    public Guid? ContextId { get; init; }
 
     public required string Content { get; init; }
 
-    public required Guid? ReplacedByMemoryId { get; init; }
+    public DateTimeOffset? Removed { get; init; }
+
+    public string? RemovalReason { get; init; }
 
     public static Faker<Memory> Faker() =>
         new Faker<Memory>()
@@ -34,9 +36,6 @@ public static partial class FakerExtensions
 
     public static Faker<Memory> WithContext(this Faker<Memory> faker, MemoryContext context) =>
         faker.RuleFor(x => x.ContextId, context.Id);
-
-    public static Faker<Memory> WithReplacementMemory(this Faker<Memory> faker, Memory memory) =>
-        faker.RuleFor(x => x.ReplacedByMemoryId, memory.Id);
 }
 
 public static partial class DbConnectionExtensions
@@ -45,8 +44,8 @@ public static partial class DbConnectionExtensions
     {
         connection.Execute(
             """
-            insert into memories (id, created, topic_id, context_id, content, replaced_by_memory_id)
-            values (@Id, @Created, @TopicId, @ContextId, @Content, @ReplacedByMemoryId)
+            insert into memories (id, created, topic_id, context_id, content, removed, removal_reason)
+            values (@Id, @Created, @TopicId, @ContextId, @Content, @Removed, @RemovalReason)
             """,
             memories
         );
@@ -61,7 +60,7 @@ public static partial class DbConnectionExtensions
     )
     {
         var sql = """
-            select id, created, topic_id, context_id, content, replaced_by_memory_id
+            select id, created, topic_id, context_id, content, removed, removal_reason
             from memories
             """;
         if (where is not null)

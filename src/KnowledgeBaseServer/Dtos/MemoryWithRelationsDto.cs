@@ -9,6 +9,5 @@ public sealed record MemoryWithRelationsDto(
     string Topic,
     string Content,
     string Context,
-    Guid? ReplacedByMemoryId,
     IReadOnlyCollection<MemoryDto> LinkedMemories
-) : MemoryDto(Id, Created, Topic, Content, Context, ReplacedByMemoryId);
+) : MemoryDto(Id, Created, Topic, Content, Context);

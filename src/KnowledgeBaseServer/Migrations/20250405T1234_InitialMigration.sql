@@ -1,3 +1,5 @@
+PRAGMA foreign_keys=on;
+
 create table topics(
     id text primary key,
     created text not null,

@@ -22,31 +22,24 @@ public class GetMemoryByIdToolTests : DatabaseTest
         // arrange
         var topic = _topicFaker.Generate();
         var context = _memoryContextFaker.Generate();
-        var replacementMemory = _memoryFaker.WithTopic(topic).WithContext(context).Generate();
-        var memory = _memoryFaker
-            .WithTopic(topic)
-            .WithContext(context)
-            .WithReplacementMemory(replacementMemory)
-            .Generate();
+        var memory = _memoryFaker.WithTopic(topic).WithContext(context).Generate();
 
         using (var seedConnection = ConnectionString.CreateConnection())
         {
             seedConnection.SeedTopic(topic);
             seedConnection.SeedMemoryContext(context);
-            seedConnection.SeedMemories([replacementMemory, memory]);
+            seedConnection.SeedMemory(memory);
         }
 
-        var expected = new MemoryDto(
-            memory.Id,
-            memory.Created,
-            topic.Name,
-            memory.Content,
-            context.Value,
-            replacementMemory.Id
-        );
+        var expected = new MemoryDto(memory.Id, memory.Created, topic.Name, memory.Content, context.Value);
 
         // act
-        var result = GetMemoryByIdTool.Handle(ConnectionString, JsonSerializerOptions.Default, memory.Id, false);
+        var result = GetMemoryByIdTool.Handle(
+            ConnectionString,
+            JsonSerializerOptions.Default,
+            memory.Id,
+            includeLinkedMemories: false
+        );
 
         var actual = JsonSerializer.Deserialize<MemoryDto>(result);
 
@@ -81,15 +74,19 @@ public class GetMemoryByIdToolTests : DatabaseTest
             topic.Name,
             memory.Content,
             context.Value,
-            null,
             linkedMemories
-                .Select(m => new MemoryDto(m.Id, m.Created, topic.Name, m.Content, context.Value, null))
+                .Select(m => new MemoryDto(m.Id, m.Created, topic.Name, m.Content, context.Value))
                 .OrderBy(m => m.Created)
                 .ToList()
         );
 
         // act
-        var result = GetMemoryByIdTool.Handle(ConnectionString, JsonSerializerOptions.Default, memory.Id, true);
+        var result = GetMemoryByIdTool.Handle(
+            ConnectionString,
+            JsonSerializerOptions.Default,
+            memory.Id,
+            includeLinkedMemories: true
+        );
 
         var actual = JsonSerializer.Deserialize<MemoryWithRelationsDto>(result);
 
