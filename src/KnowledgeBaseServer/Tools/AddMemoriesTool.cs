@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.Json;
@@ -108,5 +107,3 @@ public static class AddMemoriesTool
         return JsonSerializer.Serialize(response, jsonSerializerOptions);
     }
 }
-
-public sealed record AddMemoriesResponseDto(IReadOnlyCollection<CreatedMemoryDto> Memories);

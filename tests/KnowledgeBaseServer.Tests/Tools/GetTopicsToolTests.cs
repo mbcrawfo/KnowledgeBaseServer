@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Text.Json;
 using Bogus;
+using KnowledgeBaseServer.Dtos;
 using KnowledgeBaseServer.Tests.Data;
 using KnowledgeBaseServer.Tools;
 using Shouldly;

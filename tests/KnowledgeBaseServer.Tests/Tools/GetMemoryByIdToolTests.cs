@@ -13,7 +13,6 @@ public class GetMemoryByIdToolTests : DatabaseTest
 {
     private readonly Faker<MemoryContext> _memoryContextFaker = MemoryContext.Faker();
     private readonly Faker<Memory> _memoryFaker = Memory.Faker();
-
     private readonly Faker<MemoryLink> _memoryLinkFaker = MemoryLink.Faker();
     private readonly Faker<Topic> _topicFaker = Topic.Faker();
 
@@ -21,7 +20,6 @@ public class GetMemoryByIdToolTests : DatabaseTest
     public void GetMemory_ShouldReturnMemory()
     {
         // arrange
-
         var topic = _topicFaker.Generate();
         var context = _memoryContextFaker.Generate();
         var replacementMemory = _memoryFaker.WithTopic(topic).WithContext(context).Generate();

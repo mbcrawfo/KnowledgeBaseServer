@@ -1,8 +1,8 @@
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text.Json;
 using Dapper;
 using JetBrains.Annotations;
+using KnowledgeBaseServer.Dtos;
 using ModelContextProtocol.Server;
 
 namespace KnowledgeBaseServer.Tools;
@@ -28,5 +28,3 @@ public static class GetTopicsTool
         return JsonSerializer.Serialize(response, jsonSerializerOptions);
     }
 }
-
-public sealed record TopicsResponseDto(IReadOnlyCollection<string> Topics);
