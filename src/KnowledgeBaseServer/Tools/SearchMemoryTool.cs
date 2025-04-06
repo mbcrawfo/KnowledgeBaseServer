@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using Dapper;
 using KnowledgeBaseServer.Dtos;
+using KnowledgeBaseServer.Extensions;
 using ModelContextProtocol.Server;
 
 namespace KnowledgeBaseServer.Tools;

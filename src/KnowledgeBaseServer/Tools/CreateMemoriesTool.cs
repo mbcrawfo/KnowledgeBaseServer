@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text.Json;
 using Dapper;
 using KnowledgeBaseServer.Dtos;
+using KnowledgeBaseServer.Extensions;
+using Microsoft.Data.Sqlite;
 using ModelContextProtocol.Server;
 
 namespace KnowledgeBaseServer.Tools;
@@ -24,7 +26,8 @@ public static class CreateMemoriesTool
         JsonSerializerOptions jsonSerializerOptions,
         [Description("The topic to use for the memories.")] string topic,
         [Description("The text of the memories.")] string[] memories,
-        [Description("Optional information to provide context for these memories.")] string? context = null
+        [Description("Optional information to provide context for these memories.")] string? context = null,
+        [Description("Optionally connect the new memories to an existing parent memory.")] Guid? parentMemoryId = null
     )
     {
         var now = DateTimeOffset.UtcNow;
@@ -108,6 +111,23 @@ public static class CreateMemoriesTool
             }),
             transaction
         );
+
+        if (parentMemoryId is not null)
+        {
+            try
+            {
+                _ = connection.ConnectMemoriesInternal(
+                    transaction,
+                    parentMemoryId.Value,
+                    createdMemories.Select(m => m.Id),
+                    now
+                );
+            }
+            catch (SqliteException ex) when (ex.IsForeignKeyConstraintViolation())
+            {
+                return $"Invalid {nameof(parentMemoryId)} provided.";
+            }
+        }
 
         transaction.Commit();
 

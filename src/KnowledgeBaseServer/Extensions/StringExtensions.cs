@@ -1,6 +1,6 @@
 using System.Linq;
 
-namespace KnowledgeBaseServer;
+namespace KnowledgeBaseServer.Extensions;
 
 public static class StringExtensions
 {

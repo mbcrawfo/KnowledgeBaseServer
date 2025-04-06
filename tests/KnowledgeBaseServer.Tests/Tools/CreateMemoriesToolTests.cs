@@ -1,8 +1,10 @@
+using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
 using Bogus;
 using Dapper;
 using KnowledgeBaseServer.Dtos;
+using KnowledgeBaseServer.Extensions;
 using KnowledgeBaseServer.Tests.Data;
 using KnowledgeBaseServer.Tools;
 using Shouldly;
@@ -82,6 +84,7 @@ public class CreateMemoriesToolTests : DatabaseTest
         // assert
         using var connection = ConnectionString.CreateConnection();
         connection.GetTopics().ShouldHaveSingleItem().Name.ShouldBe(topic);
+        connection.GetMemoryContexts().ShouldBeEmpty();
         connection.GetMemoryLinks().ShouldBeEmpty();
         connection.GetMemories().ShouldHaveSingleItem().Content.ShouldBe(expectedMemory);
     }
@@ -125,6 +128,63 @@ public class CreateMemoriesToolTests : DatabaseTest
                 () => memorySearches[0].Content.ShouldBe(expectedMemory),
                 () => memorySearches[0].Context.ShouldBe(expectedContext)
             );
+    }
+
+    [Fact]
+    public void ShouldReturnError_WhenParentMemoryIdIsNotValid()
+    {
+        // arrange
+
+        // act
+        var result = CreateMemoriesTool.Handle(
+            ConnectionString,
+            JsonSerializerOptions.Default,
+            _faker.Lorem.Sentence(),
+            [_faker.Lorem.Sentence()],
+            parentMemoryId: _faker.Random.Guid()
+        );
+
+        // assert
+        result.ShouldBe("Invalid parentMemoryId provided.");
+        using var connection = ConnectionString.CreateConnection();
+        connection.GetTopics().ShouldBeEmpty();
+        connection.GetMemoryContexts().ShouldBeEmpty();
+        connection.GetMemories().ShouldBeEmpty();
+        connection.GetMemoryLinks().ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void ShouldLinkNewMemories_WhenParentMemoryIdProvided()
+    {
+        // arrange
+        var parentMemories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
+            CreateMemoriesTool.Handle(
+                ConnectionString,
+                JsonSerializerOptions.Default,
+                _faker.Lorem.Sentence(),
+                [_faker.Lorem.Sentence()]
+            )
+        );
+        Debug.Assert(parentMemories is { Length: 1 });
+        var parentMemoryId = parentMemories[0].Id;
+
+        // act
+        var childMemories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
+            CreateMemoriesTool.Handle(
+                ConnectionString,
+                JsonSerializerOptions.Default,
+                _faker.Lorem.Sentence(),
+                [_faker.Lorem.Sentence()],
+                parentMemoryId: parentMemoryId
+            )
+        );
+
+        // assert
+        var childMemoryId = childMemories.ShouldNotBeNull().ShouldHaveSingleItem().Id;
+        using var connection = ConnectionString.CreateConnection();
+        var memoryLink = connection.GetMemoryLinks().ShouldHaveSingleItem();
+        memoryLink.FromMemoryId.ShouldBe(childMemoryId);
+        memoryLink.ToMemoryId.ShouldBe(parentMemoryId);
     }
 
     [Fact]
