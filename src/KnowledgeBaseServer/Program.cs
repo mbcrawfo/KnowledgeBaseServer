@@ -29,10 +29,10 @@ if (args is ["--init-db", ..])
         return 1;
     }
 
-    return Migrator.InitializeDatabase(initLoggerFactory, $"Data Source={path}") ? 0 : 1;
+    return Migrator.ApplyMigrations(initLoggerFactory, ConnectionString.Create(path)) ? 0 : 1;
 }
 
-var databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME") ?? "default.sqlite";
+var databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME") ?? "knowledgebase.sqlite";
 var defaultPath = Path.Combine(
     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
     "KnowledgeBaseServer",

@@ -12,5 +12,10 @@ RUN dotnet publish ./KnowledgeBaseServer/KnowledgeBaseServer.csproj --no-restore
 
 FROM mcr.microsoft.com/dotnet/runtime:9.0-alpine AS final
 WORKDIR /app
+
+# The app is going to use DATABASE_PATH, but this allows users to change the file name by only specifying DATABASE_NAME.
+ENV DATABASE_NAME=knowledgebase.db
+ENV DATABASE_PATH=/db/${DATABASE_NAME}
+
 COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "KnowledgeBaseServer.dll"]
