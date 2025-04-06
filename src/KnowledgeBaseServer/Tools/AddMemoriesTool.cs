@@ -18,7 +18,7 @@ public static class AddMemoriesTool
         JsonSerializerOptions jsonSerializerOptions,
         [Description("The topic to use for the memories.")] string topic,
         [Description("The text of the memories.")] string[] memories,
-        [Description("Context information associated with the memories.")] string context
+        [Description("Optional information to provide context for these memories.")] string? context = null
     )
     {
         var now = DateTimeOffset.UtcNow;
@@ -51,20 +51,24 @@ public static class AddMemoriesTool
             );
         }
 
-        var memoryContext = new
+        Guid? contextId = null;
+        if (!string.IsNullOrEmpty(context))
         {
-            Id = Guid.CreateVersion7(),
-            Created = now,
-            Value = context,
-        };
-        connection.Execute(
-            sql: """
-            insert into memory_contexts (id, created, value) values
-            (@Id, @Created, @Value)
-            """,
-            memoryContext,
-            transaction
-        );
+            contextId = Guid.CreateVersion7();
+            connection.Execute(
+                sql: """
+                insert into memory_contexts (id, created, value) values
+                (@Id, @Created, @Value)
+                """,
+                new
+                {
+                    Id = contextId,
+                    Created = now,
+                    Value = context,
+                },
+                transaction
+            );
+        }
 
         var createdMemories = memories
             .Select(m => new
@@ -72,7 +76,7 @@ public static class AddMemoriesTool
                 Id = Guid.CreateVersion7(),
                 Created = now,
                 TopicId = topicId,
-                ContextId = memoryContext.Id,
+                ContextId = contextId,
                 Content = m,
             })
             .ToArray();
@@ -94,7 +98,7 @@ public static class AddMemoriesTool
             {
                 MemoryId = m.Id,
                 m.Content,
-                Context = memoryContext.Value,
+                Context = context,
             }),
             transaction
         );

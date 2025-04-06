@@ -16,7 +16,7 @@ public class AddMemoriesToolTests : DatabaseTest
     private readonly Faker<Topic> _topicFaker = Topic.Faker();
 
     [Fact]
-    public void AddMemories_ShouldCreateTopicAndMemory_WhenTopicDoesNotExist()
+    public void ShouldCreateTopicAndMemory_WhenTopicDoesNotExist()
     {
         // arrange
         var expectedTopic = _faker.Lorem.Sentence();
@@ -32,28 +32,15 @@ public class AddMemoriesToolTests : DatabaseTest
             expectedContext
         );
 
-        using var connection = ConnectionString.CreateConnection();
-        var actualTopics = connection.GetTopics();
-        var actualMemories = connection.GetMemories();
-        var actualContexts = connection.GetMemoryContexts();
-
         // assert
-        actualTopics.ShouldSatisfyAllConditions(
-            () => actualTopics.ShouldHaveSingleItem(),
-            () => actualTopics[0].Name.ShouldBe(expectedTopic)
-        );
-        actualMemories.ShouldSatisfyAllConditions(
-            () => actualMemories.ShouldHaveSingleItem(),
-            () => actualMemories[0].Content.ShouldBe(expectedMemory)
-        );
-        actualContexts.ShouldSatisfyAllConditions(
-            () => actualContexts.ShouldHaveSingleItem(),
-            () => actualContexts[0].Value.ShouldBe(expectedContext)
-        );
+        using var connection = ConnectionString.CreateConnection();
+        connection.GetTopics().ShouldHaveSingleItem().Name.ShouldBe(expectedTopic);
+        connection.GetMemoryContexts().ShouldHaveSingleItem().Value.ShouldBe(expectedContext);
+        connection.GetMemories().ShouldHaveSingleItem().Content.ShouldBe(expectedMemory);
     }
 
     [Fact]
-    public void AddMemories_ShouldCreateNewMemoryAndContext_WhenTopicExists()
+    public void ShouldCreateNewMemoryAndContext_WhenTopicExists()
     {
         // arrange
         var expectedTopic = _topicFaker.Generate();
@@ -74,28 +61,33 @@ public class AddMemoriesToolTests : DatabaseTest
             expectedContext
         );
 
-        using var connection = ConnectionString.CreateConnection();
-        var actualTopics = connection.GetTopics();
-        var actualMemories = connection.GetMemories();
-        var actualContexts = connection.GetMemoryContexts();
-
         // assert
-        actualTopics.ShouldSatisfyAllConditions(
-            () => actualTopics.ShouldHaveSingleItem(),
-            () => actualTopics[0].Name.ShouldBe(expectedTopic.Name)
-        );
-        actualMemories.ShouldSatisfyAllConditions(
-            () => actualMemories.ShouldHaveSingleItem(),
-            () => actualMemories[0].Content.ShouldBe(expectedMemory)
-        );
-        actualContexts.ShouldSatisfyAllConditions(
-            () => actualContexts.ShouldHaveSingleItem(),
-            () => actualContexts[0].Value.ShouldBe(expectedContext)
-        );
+        using var connection = ConnectionString.CreateConnection();
+        connection.GetTopics().ShouldHaveSingleItem().Name.ShouldBe(expectedTopic.Name);
+        connection.GetMemoryContexts().ShouldHaveSingleItem().Value.ShouldBe(expectedContext);
+        connection.GetMemories().ShouldHaveSingleItem().Content.ShouldBe(expectedMemory);
     }
 
     [Fact]
-    public void AddMemories_ShouldUpdateSearchIndex()
+    public void ShouldCreateMemoryWithoutContext_WhenContextIsNull()
+    {
+        // arrange
+        var topic = _faker.Lorem.Sentence();
+        var expectedMemory = _faker.Lorem.Sentence();
+
+        // act
+
+        _ = AddMemoriesTool.Handle(ConnectionString, JsonSerializerOptions.Default, topic, [expectedMemory]);
+
+        // assert
+        using var connection = ConnectionString.CreateConnection();
+        connection.GetTopics().ShouldHaveSingleItem().Name.ShouldBe(topic);
+        connection.GetMemoryLinks().ShouldBeEmpty();
+        connection.GetMemories().ShouldHaveSingleItem().Content.ShouldBe(expectedMemory);
+    }
+
+    [Fact]
+    public void ShouldUpdateSearchIndex()
     {
         // arrange
         var topic = _faker.Lorem.Sentence();
@@ -136,7 +128,7 @@ public class AddMemoriesToolTests : DatabaseTest
     }
 
     [Fact]
-    public void AddMemories_ShouldReturnNewMemoriesWithIds()
+    public void ShouldReturnNewMemoriesWithIds()
     {
         // arrange
         var topic = _topicFaker.Generate();

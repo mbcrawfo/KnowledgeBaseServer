@@ -8,6 +8,6 @@ public sealed record MemoryWithRelationsDto(
     DateTimeOffset Created,
     string Topic,
     string Content,
-    string Context,
+    string? Context,
     IReadOnlyCollection<MemoryDto> LinkedMemories
 ) : MemoryDto(Id, Created, Topic, Content, Context);
