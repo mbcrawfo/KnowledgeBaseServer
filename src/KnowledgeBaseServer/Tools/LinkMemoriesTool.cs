@@ -12,9 +12,9 @@ public static class LinkMemoriesTool
     [McpServerTool(Name = "LinkMemories", ReadOnly = false, Destructive = false, Idempotent = true, OpenWorld = false)]
     [Description("Links two memories together to help find related memories in the future.")]
     public static string LinkMemories(
+        ConnectionString connectionString,
         [Description("The id of the first memory.")] Guid fromMemoryId,
-        [Description("The id of the second memory.")] Guid toMemoryId,
-        ConnectionString connectionString
+        [Description("The id of the second memory.")] Guid toMemoryId
     )
     {
         using var connection = connectionString.CreateConnection();

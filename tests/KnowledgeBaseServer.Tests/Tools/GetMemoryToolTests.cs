@@ -48,7 +48,7 @@ public class GetMemoryToolTests : DatabaseTest
         );
 
         // act
-        var result = GetMemoryTool.GetMemory(memory.Id, false, ConnectionString, JsonSerializerOptions.Default);
+        var result = GetMemoryTool.GetMemory(ConnectionString, JsonSerializerOptions.Default, memory.Id, false);
 
         var actual = JsonSerializer.Deserialize<MemoryDto>(result);
 
@@ -91,7 +91,7 @@ public class GetMemoryToolTests : DatabaseTest
         );
 
         // act
-        var result = GetMemoryTool.GetMemory(memory.Id, true, ConnectionString, JsonSerializerOptions.Default);
+        var result = GetMemoryTool.GetMemory(ConnectionString, JsonSerializerOptions.Default, memory.Id, true);
 
         var actual = JsonSerializer.Deserialize<MemoryWithRelationsDto>(result);
 

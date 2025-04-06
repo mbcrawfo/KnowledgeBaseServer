@@ -15,11 +15,11 @@ public static class AddMemoryTool
     [McpServerTool(Name = "AddMemories", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false)]
     [Description("Store memories in the knowledge base.")]
     public static string AddMemories(
+        ConnectionString connectionString,
+        JsonSerializerOptions jsonSerializerOptions,
         [Description("The topic of the memories.")] string topic,
         [Description("The text of the memories.")] string[] memories,
-        [Description("Context information for the memories.")] string context,
-        ConnectionString connectionString,
-        JsonSerializerOptions jsonSerializerOptions
+        [Description("Context information for the memories.")] string context
     )
     {
         var now = DateTimeOffset.UtcNow;

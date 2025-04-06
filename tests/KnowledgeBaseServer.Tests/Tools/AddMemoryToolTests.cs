@@ -25,11 +25,11 @@ public class AddMemoryToolTests : DatabaseTest
 
         // act
         _ = AddMemoryTool.AddMemories(
+            ConnectionString,
+            JsonSerializerOptions.Default,
             expectedTopic,
             [expectedMemory],
-            expectedContext,
-            ConnectionString,
-            JsonSerializerOptions.Default
+            expectedContext
         );
 
         using var connection = ConnectionString.CreateConnection();
@@ -67,11 +67,11 @@ public class AddMemoryToolTests : DatabaseTest
 
         // act
         _ = AddMemoryTool.AddMemories(
+            ConnectionString,
+            JsonSerializerOptions.Default,
             expectedTopic.Name,
             [expectedMemory],
-            expectedContext,
-            ConnectionString,
-            JsonSerializerOptions.Default
+            expectedContext
         );
 
         using var connection = ConnectionString.CreateConnection();
@@ -106,11 +106,11 @@ public class AddMemoryToolTests : DatabaseTest
 
         // act
         _ = AddMemoryTool.AddMemories(
+            ConnectionString,
+            JsonSerializerOptions.Default,
             topic,
             [expectedMemory],
-            expectedContext,
-            ConnectionString,
-            JsonSerializerOptions.Default
+            expectedContext
         );
 
         using var connection = ConnectionString.CreateConnection();
@@ -150,11 +150,11 @@ public class AddMemoryToolTests : DatabaseTest
 
         // act
         var result = AddMemoryTool.AddMemories(
+            ConnectionString,
+            JsonSerializerOptions.Default,
             topic.Name,
             [memories],
-            context,
-            ConnectionString,
-            JsonSerializerOptions.Default
+            context
         );
 
         using var connection = ConnectionString.CreateConnection();

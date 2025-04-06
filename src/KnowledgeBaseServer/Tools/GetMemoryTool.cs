@@ -13,10 +13,10 @@ public static class GetMemoryTool
     [McpServerTool(Name = "GetMemory", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false)]
     [Description("Retrieves a memory from the knowledge base.")]
     public static string GetMemory(
-        [Description("Id of the memory to retrieve.")] Guid memoryId,
-        [Description("When true, automatically loads linked memories.")] bool includeLinkedMemories,
         ConnectionString connectionString,
-        JsonSerializerOptions jsonSerializerOptions
+        JsonSerializerOptions jsonSerializerOptions,
+        [Description("Id of the memory to retrieve.")] Guid memoryId,
+        [Description("When true, automatically loads linked memories.")] bool includeLinkedMemories = false
     )
     {
         using var connection = connectionString.CreateConnection();

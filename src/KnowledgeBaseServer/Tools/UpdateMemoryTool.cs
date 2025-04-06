@@ -13,11 +13,11 @@ public static class UpdateMemoryTool
     [McpServerTool(Name = "UpdateMemory", ReadOnly = false, Destructive = false, Idempotent = true, OpenWorld = false)]
     [Description("Updates the knowledge base by replacing an existing memory with a new one.")]
     public static string UpdateMemory(
+        ConnectionString connectionString,
+        JsonSerializerOptions jsonSerializerOptions,
         [Description("The id of the memory to replace.")] Guid previousMemoryId,
         [Description("The text of the updated memory.")] string newMemory,
-        [Description("Context information for the new memory.")] string context,
-        ConnectionString connectionString,
-        JsonSerializerOptions jsonSerializerOptions
+        [Description("Context information for the new memory.")] string context
     )
     {
         using var connection = connectionString.CreateConnection();

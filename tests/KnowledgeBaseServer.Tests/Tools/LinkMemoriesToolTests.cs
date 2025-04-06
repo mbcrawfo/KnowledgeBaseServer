@@ -20,7 +20,7 @@ public class LinkMemoriesToolTests : DatabaseTest
         // arrange
 
         // act
-        var result = LinkMemoriesTool.LinkMemories(_faker.Random.Guid(), _faker.Random.Guid(), ConnectionString);
+        var result = LinkMemoriesTool.LinkMemories(ConnectionString, _faker.Random.Guid(), _faker.Random.Guid());
 
         using var connection = ConnectionString.CreateConnection();
         var memoryLinks = connection.GetMemoryLinks();
@@ -48,7 +48,7 @@ public class LinkMemoriesToolTests : DatabaseTest
         }
 
         // act
-        var result = LinkMemoriesTool.LinkMemories(_faker.Random.Guid(), _faker.Random.Guid(), ConnectionString);
+        var result = LinkMemoriesTool.LinkMemories(ConnectionString, _faker.Random.Guid(), _faker.Random.Guid());
 
         using var connection = ConnectionString.CreateConnection();
         var actualMemoryLinks = connection.GetMemoryLinks();
@@ -75,7 +75,7 @@ public class LinkMemoriesToolTests : DatabaseTest
         }
 
         // act
-        var result = LinkMemoriesTool.LinkMemories(memories[0].Id, memories[1].Id, ConnectionString);
+        var result = LinkMemoriesTool.LinkMemories(ConnectionString, memories[0].Id, memories[1].Id);
 
         using var connection = ConnectionString.CreateConnection();
         var actualMemoryLinks = connection.GetMemoryLinks();

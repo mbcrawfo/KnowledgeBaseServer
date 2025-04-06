@@ -24,11 +24,11 @@ public class UpdateMemoryToolTests : DatabaseTest
 
         // act
         var result = UpdateMemoryTool.UpdateMemory(
+            ConnectionString,
+            JsonSerializerOptions.Default,
             _faker.Random.Guid(),
             _faker.Lorem.Sentence(),
-            _faker.Lorem.Sentence(),
-            ConnectionString,
-            JsonSerializerOptions.Default
+            _faker.Lorem.Sentence()
         );
 
         using var connection = ConnectionString.CreateConnection();
@@ -61,11 +61,11 @@ public class UpdateMemoryToolTests : DatabaseTest
 
         // act
         var result = UpdateMemoryTool.UpdateMemory(
+            ConnectionString,
+            JsonSerializerOptions.Default,
             previousMemory.Id,
             _faker.Lorem.Sentence(),
-            _faker.Lorem.Sentence(),
-            ConnectionString,
-            JsonSerializerOptions.Default
+            _faker.Lorem.Sentence()
         );
 
         using var connection = ConnectionString.CreateConnection();
@@ -96,11 +96,11 @@ public class UpdateMemoryToolTests : DatabaseTest
 
         // act
         _ = UpdateMemoryTool.UpdateMemory(
+            ConnectionString,
+            JsonSerializerOptions.Default,
             previousMemory.Id,
             expectedMemory,
-            expectedContext,
-            ConnectionString,
-            JsonSerializerOptions.Default
+            expectedContext
         );
 
         using var connection = ConnectionString.CreateConnection();
@@ -138,11 +138,11 @@ public class UpdateMemoryToolTests : DatabaseTest
 
         // act
         _ = UpdateMemoryTool.UpdateMemory(
+            ConnectionString,
+            JsonSerializerOptions.Default,
             previousMemory.Id,
             expectedMemory,
-            context.Value,
-            ConnectionString,
-            JsonSerializerOptions.Default
+            context.Value
         );
 
         using var connection = ConnectionString.CreateConnection();
@@ -186,11 +186,11 @@ public class UpdateMemoryToolTests : DatabaseTest
 
         // act
         var result = UpdateMemoryTool.UpdateMemory(
+            ConnectionString,
+            JsonSerializerOptions.Default,
             previousMemory.Id,
             expectedMemory,
-            context.Value,
-            ConnectionString,
-            JsonSerializerOptions.Default
+            context.Value
         );
 
         var actual = JsonSerializer.Deserialize<CreatedMemoryDto>(result);
