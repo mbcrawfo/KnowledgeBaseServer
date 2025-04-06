@@ -69,12 +69,12 @@ public class SearchMemoryToolTests : DatabaseTest
         var context = _faker.Lorem.Sentence();
         var searchPhrase = _faker.PickRandom(content.Split(' '));
 
-        var memory = JsonSerializer.Deserialize<AddMemoriesResponseDto>(
+        var memories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
             AddMemoriesTool.Handle(ConnectionString, JsonSerializerOptions.Default, topic, [content], context)
         );
-        Debug.Assert(memory is not null);
+        Debug.Assert(memories is not null);
         var expected = JsonSerializer.Deserialize<MemoryDto>(
-            GetMemoryByIdTool.Handle(ConnectionString, JsonSerializerOptions.Default, memory.Memories.First().Id)
+            GetMemoryByIdTool.Handle(ConnectionString, JsonSerializerOptions.Default, memories[0].Id)
         );
 
         // act

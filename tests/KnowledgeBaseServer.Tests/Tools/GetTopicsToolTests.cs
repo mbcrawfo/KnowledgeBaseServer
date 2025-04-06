@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Text.Json;
 using Bogus;
-using KnowledgeBaseServer.Dtos;
 using KnowledgeBaseServer.Tests.Data;
 using KnowledgeBaseServer.Tools;
 using Shouldly;
@@ -26,10 +25,11 @@ public class GetTopicsToolTests : DatabaseTest
         var expected = topics.Select(t => t.Name).Order().ToArray();
 
         // act
-        var result = GetTopicsTool.Handle(ConnectionString, JsonSerializerOptions.Default);
-        var actual = JsonSerializer.Deserialize<TopicsResponseDto>(result);
+        var actual = JsonSerializer.Deserialize<string[]>(
+            GetTopicsTool.Handle(ConnectionString, JsonSerializerOptions.Default)
+        );
 
         // assert
-        actual.ShouldNotBeNull().Topics.ShouldBe(expected);
+        actual.ShouldBe(expected);
     }
 }

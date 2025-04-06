@@ -1,8 +1,6 @@
 using System.ComponentModel;
 using System.Text.Json;
 using Dapper;
-using JetBrains.Annotations;
-using KnowledgeBaseServer.Dtos;
 using ModelContextProtocol.Server;
 
 namespace KnowledgeBaseServer.Tools;
@@ -16,15 +14,16 @@ public static class GetTopicsTool
     {
         using var connection = connectionString.CreateConnection();
 
-        var topics = connection.Query<string>(
-            """
-            select name
-            from topics
-            order by name
-            """
-        );
+        var topics = connection
+            .Query<string>(
+                """
+                select name
+                from topics
+                order by name
+                """
+            )
+            .AsList();
 
-        var response = new TopicsResponseDto(topics.AsList());
-        return JsonSerializer.Serialize(response, jsonSerializerOptions);
+        return JsonSerializer.Serialize(topics, jsonSerializerOptions);
     }
 }

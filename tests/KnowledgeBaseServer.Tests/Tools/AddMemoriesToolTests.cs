@@ -149,19 +149,14 @@ public class AddMemoriesToolTests : DatabaseTest
         var context = _faker.Lorem.Sentence();
 
         // act
-        var result = AddMemoriesTool.Handle(
-            ConnectionString,
-            JsonSerializerOptions.Default,
-            topic.Name,
-            [memories],
-            context
+        var actualMemories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
+            AddMemoriesTool.Handle(ConnectionString, JsonSerializerOptions.Default, topic.Name, [memories], context)
         );
 
         using var connection = ConnectionString.CreateConnection();
         var expectedMemories = connection.GetMemories().Select(m => new CreatedMemoryDto(m.Id, m.Content));
-        var actualMemories = JsonSerializer.Deserialize<AddMemoriesResponseDto>(result);
 
         // assert
-        actualMemories.ShouldNotBeNull().Memories.ShouldBe(expectedMemories);
+        actualMemories.ShouldBe(expectedMemories);
     }
 }

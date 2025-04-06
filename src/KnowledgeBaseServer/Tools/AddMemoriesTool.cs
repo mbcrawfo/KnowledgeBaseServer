@@ -101,9 +101,9 @@ public static class AddMemoriesTool
 
         transaction.Commit();
 
-        var response = new AddMemoriesResponseDto(
-            createdMemories.Select(m => new CreatedMemoryDto(m.Id, m.Content)).ToArray()
+        return JsonSerializer.Serialize(
+            createdMemories.Select(m => new CreatedMemoryDto(m.Id, m.Content)).ToArray(),
+            jsonSerializerOptions
         );
-        return JsonSerializer.Serialize(response, jsonSerializerOptions);
     }
 }
