@@ -11,8 +11,11 @@ namespace KnowledgeBaseServer.Tools;
 public static class UpdateMemoryTool
 {
     [McpServerTool(Name = "UpdateMemory", ReadOnly = false, Destructive = false, Idempotent = true, OpenWorld = false)]
-    [Description("Updates the knowledge base by replacing an existing memory with a new one.")]
-    public static string UpdateMemory(
+    [Description(
+        "Updates the knowledge base by replacing an existing memory with a new one.  "
+            + "The new memory is created with the same topic as the original memory."
+    )]
+    public static string Handle(
         ConnectionString connectionString,
         JsonSerializerOptions jsonSerializerOptions,
         [Description("The id of the memory to replace.")] Guid previousMemoryId,

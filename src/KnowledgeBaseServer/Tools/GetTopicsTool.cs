@@ -12,7 +12,7 @@ public static class GetTopicsTool
 {
     [McpServerTool(Name = "GetTopics", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false)]
     [Description("Lists all topics in the knowledge base.")]
-    public static string GetTopics(ConnectionString connectionString, JsonSerializerOptions jsonSerializerOptions)
+    public static string Handle(ConnectionString connectionString, JsonSerializerOptions jsonSerializerOptions)
     {
         using var connection = connectionString.CreateConnection();
 

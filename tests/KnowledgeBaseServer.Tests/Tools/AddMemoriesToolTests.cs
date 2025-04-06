@@ -10,7 +10,7 @@ using Xunit;
 
 namespace KnowledgeBaseServer.Tests.Tools;
 
-public class AddMemoryToolTests : DatabaseTest
+public class AddMemoriesToolTests : DatabaseTest
 {
     private readonly Faker _faker = new();
     private readonly Faker<Topic> _topicFaker = Topic.Faker();
@@ -24,7 +24,7 @@ public class AddMemoryToolTests : DatabaseTest
         var expectedContext = _faker.Lorem.Sentence();
 
         // act
-        _ = AddMemoryTool.AddMemories(
+        _ = AddMemoriesTool.Handle(
             ConnectionString,
             JsonSerializerOptions.Default,
             expectedTopic,
@@ -66,7 +66,7 @@ public class AddMemoryToolTests : DatabaseTest
         var expectedContext = _faker.Lorem.Sentence();
 
         // act
-        _ = AddMemoryTool.AddMemories(
+        _ = AddMemoriesTool.Handle(
             ConnectionString,
             JsonSerializerOptions.Default,
             expectedTopic.Name,
@@ -105,7 +105,7 @@ public class AddMemoryToolTests : DatabaseTest
         var searchWord = _faker.PickRandom(expectedMemory.Split(' ')).RemovePunctuation();
 
         // act
-        _ = AddMemoryTool.AddMemories(
+        _ = AddMemoriesTool.Handle(
             ConnectionString,
             JsonSerializerOptions.Default,
             topic,
@@ -149,7 +149,7 @@ public class AddMemoryToolTests : DatabaseTest
         var context = _faker.Lorem.Sentence();
 
         // act
-        var result = AddMemoryTool.AddMemories(
+        var result = AddMemoriesTool.Handle(
             ConnectionString,
             JsonSerializerOptions.Default,
             topic.Name,

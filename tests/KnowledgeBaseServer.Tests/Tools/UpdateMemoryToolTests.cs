@@ -23,7 +23,7 @@ public class UpdateMemoryToolTests : DatabaseTest
         // arrange
 
         // act
-        var result = UpdateMemoryTool.UpdateMemory(
+        var result = UpdateMemoryTool.Handle(
             ConnectionString,
             JsonSerializerOptions.Default,
             _faker.Random.Guid(),
@@ -60,7 +60,7 @@ public class UpdateMemoryToolTests : DatabaseTest
         }
 
         // act
-        var result = UpdateMemoryTool.UpdateMemory(
+        var result = UpdateMemoryTool.Handle(
             ConnectionString,
             JsonSerializerOptions.Default,
             previousMemory.Id,
@@ -95,7 +95,7 @@ public class UpdateMemoryToolTests : DatabaseTest
         var expectedContext = _faker.Lorem.Sentence();
 
         // act
-        _ = UpdateMemoryTool.UpdateMemory(
+        _ = UpdateMemoryTool.Handle(
             ConnectionString,
             JsonSerializerOptions.Default,
             previousMemory.Id,
@@ -137,7 +137,7 @@ public class UpdateMemoryToolTests : DatabaseTest
         var searchWord = _faker.PickRandom(expectedMemory.Split(' ')).RemovePunctuation();
 
         // act
-        _ = UpdateMemoryTool.UpdateMemory(
+        _ = UpdateMemoryTool.Handle(
             ConnectionString,
             JsonSerializerOptions.Default,
             previousMemory.Id,
@@ -185,7 +185,7 @@ public class UpdateMemoryToolTests : DatabaseTest
         var expectedMemory = _faker.Lorem.Sentence();
 
         // act
-        var result = UpdateMemoryTool.UpdateMemory(
+        var result = UpdateMemoryTool.Handle(
             ConnectionString,
             JsonSerializerOptions.Default,
             previousMemory.Id,

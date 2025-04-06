@@ -10,16 +10,16 @@ using ModelContextProtocol.Server;
 namespace KnowledgeBaseServer.Tools;
 
 [McpServerToolType]
-public static class AddMemoryTool
+public static class AddMemoriesTool
 {
     [McpServerTool(Name = "AddMemories", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false)]
-    [Description("Store memories in the knowledge base.")]
-    public static string AddMemories(
+    [Description("Adds memories to the knowledge base.")]
+    public static string Handle(
         ConnectionString connectionString,
         JsonSerializerOptions jsonSerializerOptions,
-        [Description("The topic of the memories.")] string topic,
+        [Description("The topic to use for the memories.")] string topic,
         [Description("The text of the memories.")] string[] memories,
-        [Description("Context information for the memories.")] string context
+        [Description("Context information associated with the memories.")] string context
     )
     {
         var now = DateTimeOffset.UtcNow;

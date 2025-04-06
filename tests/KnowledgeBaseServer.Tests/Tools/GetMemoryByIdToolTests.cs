@@ -9,7 +9,7 @@ using Xunit;
 
 namespace KnowledgeBaseServer.Tests.Tools;
 
-public class GetMemoryToolTests : DatabaseTest
+public class GetMemoryByIdToolTests : DatabaseTest
 {
     private readonly Faker<MemoryContext> _memoryContextFaker = MemoryContext.Faker();
     private readonly Faker<Memory> _memoryFaker = Memory.Faker();
@@ -48,7 +48,7 @@ public class GetMemoryToolTests : DatabaseTest
         );
 
         // act
-        var result = GetMemoryTool.GetMemory(ConnectionString, JsonSerializerOptions.Default, memory.Id, false);
+        var result = GetMemoryByIdTool.Handle(ConnectionString, JsonSerializerOptions.Default, memory.Id, false);
 
         var actual = JsonSerializer.Deserialize<MemoryDto>(result);
 
@@ -91,7 +91,7 @@ public class GetMemoryToolTests : DatabaseTest
         );
 
         // act
-        var result = GetMemoryTool.GetMemory(ConnectionString, JsonSerializerOptions.Default, memory.Id, true);
+        var result = GetMemoryByIdTool.Handle(ConnectionString, JsonSerializerOptions.Default, memory.Id, true);
 
         var actual = JsonSerializer.Deserialize<MemoryWithRelationsDto>(result);
 

@@ -10,8 +10,8 @@ namespace KnowledgeBaseServer.Tools;
 public static class LinkMemoriesTool
 {
     [McpServerTool(Name = "LinkMemories", ReadOnly = false, Destructive = false, Idempotent = true, OpenWorld = false)]
-    [Description("Links two memories together to help find related memories in the future.")]
-    public static string LinkMemories(
+    [Description("Links memories together to help find related memories in the future.")]
+    public static string Handle(
         ConnectionString connectionString,
         [Description("The id of the first memory.")] Guid fromMemoryId,
         [Description("The id of the second memory.")] Guid toMemoryId
@@ -34,10 +34,12 @@ public static class LinkMemoriesTool
                 }
             );
         }
+        // FK constraint violation
         catch (SqliteException ex) when (ex is { SqliteErrorCode: 19, SqliteExtendedErrorCode: 787 })
         {
             return "Invalid memory id provided.";
         }
+        // PK constraint violation
         catch (SqliteException ex) when (ex is { SqliteErrorCode: 19, SqliteExtendedErrorCode: 1555 })
         {
             return "The requested memories are already linked.";

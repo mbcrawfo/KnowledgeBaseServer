@@ -8,15 +8,16 @@ using ModelContextProtocol.Server;
 namespace KnowledgeBaseServer.Tools;
 
 [McpServerToolType]
-public static class GetMemoryTool
+public static class GetMemoryByIdTool
 {
-    [McpServerTool(Name = "GetMemory", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false)]
-    [Description("Retrieves a memory from the knowledge base.")]
-    public static string GetMemory(
+    [McpServerTool(Name = "GetMemoryById", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false)]
+    [Description("Retrieves a single memory from the knowledge base.")]
+    public static string Handle(
         ConnectionString connectionString,
         JsonSerializerOptions jsonSerializerOptions,
         [Description("Id of the memory to retrieve.")] Guid memoryId,
-        [Description("When true, automatically loads linked memories.")] bool includeLinkedMemories = false
+        [Description("When true, the response include memories linked to the requested memory.")]
+            bool includeLinkedMemories = false
     )
     {
         using var connection = connectionString.CreateConnection();
