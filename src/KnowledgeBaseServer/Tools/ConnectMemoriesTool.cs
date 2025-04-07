@@ -39,10 +39,6 @@ public static class ConnectMemoriesTool
         {
             return "Invalid ids provided.";
         }
-        catch (SqliteException ex) when (ex.IsPrimaryKeyConstraintViolation())
-        {
-            return "Some of the requested memory nodes are already linked.";
-        }
 
         return "Memories linked successfully.";
     }
@@ -68,6 +64,7 @@ public static class ConnectMemoriesTool
             sql: """
             insert into memory_edges (source_memory_node_id, target_memory_node_id, created) values
             (@SourceMemoryNodeId, @TargetMemoryNodeId, @Created)
+            on conflict do nothing
             """,
             data,
             transaction

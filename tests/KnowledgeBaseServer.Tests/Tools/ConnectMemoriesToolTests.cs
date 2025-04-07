@@ -28,7 +28,7 @@ public class ConnectMemoriesToolTests : DatabaseTest
     }
 
     [Fact]
-    public void ShouldReturnNotModifyDatabase_WhenLinkExists()
+    public void ShouldDoNothing_WhenEdgeExists()
     {
         // arrange
         var memories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
@@ -61,12 +61,12 @@ public class ConnectMemoriesToolTests : DatabaseTest
 
         // assert
         using var connection = ConnectionString.CreateConnection();
-        result.ShouldContain("already linked");
+        result.ShouldContain("Memories linked successfully.");
         connection.GetMemoryEdges().ShouldHaveSingleItem();
     }
 
     [Fact]
-    public void ShouldCreateLink()
+    public void ShouldCreateEdge()
     {
         // arrange
         var memories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
