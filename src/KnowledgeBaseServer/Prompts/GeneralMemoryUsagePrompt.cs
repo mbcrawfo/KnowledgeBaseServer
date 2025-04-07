@@ -20,10 +20,14 @@ public static class GeneralMemoryUsagePrompt
                 - When the user uses phrasing such as "remember that", you should always save the information in memory.
                 - You should also save information that you think might be useful in the future, even if the user doesn't
                     explicitly ask you to remember it.
+                - Memories are grouped by topic. Topics can be broad categories such as "Programming" or "Travel", or
+                    more specific, such as "2025 Vacation Plans".
                 - Memories should typically be small, concise pieces of information.  However, you can save larger
                     pieces of information if you think they are important.
                 - Memories are for your future use. You can phrase the information in whatever way you think will be
                     most useful to you.  You may also store complex formats such as Markdown or JSON.
+                - Memories can include optional context information to help you recall why this information is
+                    important or why you saved it.
             2. Connect related memories:
                 - Your memories form nodes in a graph. You should connect related memories together to form a network of
                     information.
@@ -41,6 +45,10 @@ public static class GeneralMemoryUsagePrompt
                     information.
                 - When you find a memory that is marked as containing outdated information, you should ignore it.
                     However, you should look for a newer memory that is connected to it.
+            5. Quiet usage:
+                - You do not need to inform the user when you are using tools to create or update memories.
+                - When you are searching for memories and loading memory information, you can do so silently, or use a
+                    short phrase such as "Let me think about that for a moment."
             """
         );
 }
