@@ -19,17 +19,15 @@ if (args is ["--init-db", ..])
 {
     if (args is not ["--init-db", var path])
     {
-        Console.WriteLine("Usage: dotnet run --init-db <path>");
+        Console.WriteLine("Usage: dotnet run -- --init-db <path/to/db.sqlite>");
         return 1;
     }
 
     var initLoggerFactory = LoggerFactory.Create(builder => builder.AddConsole().SetMinimumLevel(logLevel));
-    if (!Migrator.InitializeDatabase(initLoggerFactory, path))
-    {
-        return 1;
-    }
-
-    return Migrator.ApplyMigrations(initLoggerFactory, ConnectionString.Create(path)) ? 0 : 1;
+    var initSuccess =
+        Migrator.InitializeDatabase(initLoggerFactory, path)
+        && Migrator.ApplyMigrations(initLoggerFactory, ConnectionString.Create(path));
+    return initSuccess ? 0 : 1;
 }
 
 var databaseName = Environment.GetEnvironmentVariable("DATABASE_NAME") ?? "knowledgebase.sqlite";
@@ -53,10 +51,10 @@ var app = builder.Build();
 var appLoggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
 appLoggerFactory.CreateLogger(nameof(Program)).LogInformation("Using database at {Path}", databasePath);
 
-if (
-    !Migrator.InitializeDatabase(appLoggerFactory, databasePath)
-    || !Migrator.ApplyMigrations(appLoggerFactory, connectionString)
-)
+var dbSetupSuccess =
+    Migrator.InitializeDatabase(appLoggerFactory, databasePath)
+    && Migrator.ApplyMigrations(appLoggerFactory, connectionString);
+if (!dbSetupSuccess)
 {
     return 1;
 }
