@@ -17,7 +17,7 @@ public class GetMemoryByIdToolTests : DatabaseTest
     private readonly Faker<Topic> _topicFaker = Topic.Faker();
 
     [Fact]
-    public void GetMemory_ShouldReturnMemory()
+    public void ShouldReturnMemory()
     {
         // arrange
         var topic = _topicFaker.Generate();
@@ -48,7 +48,7 @@ public class GetMemoryByIdToolTests : DatabaseTest
     }
 
     [Fact]
-    public void GetMemory_ShouldReturnMemoryWithRelatedMemories()
+    public void ShouldReturnMemoryWithRelatedMemories()
     {
         // arrange
         var topic = _topicFaker.Generate();

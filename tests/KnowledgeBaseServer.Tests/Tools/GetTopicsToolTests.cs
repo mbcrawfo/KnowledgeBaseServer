@@ -13,7 +13,7 @@ public class GetTopicsToolTests : DatabaseTest
     private readonly Faker<Topic> _topicFaker = Topic.Faker();
 
     [Fact]
-    public void GetTopics_ShouldReturnTopicsInDatabase()
+    public void ShouldReturnTopicsInDatabase()
     {
         // arrange
         var topics = _topicFaker.Generate(3);
