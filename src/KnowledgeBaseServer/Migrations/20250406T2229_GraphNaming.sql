@@ -1,5 +1,7 @@
 -- Renames tables and columns to use graph terminology.
 
+PRAGMA foreign_keys=off;
+
 alter table memories rename to memory_nodes;
 
 drop index idx_memory_links_to_memory_id;
@@ -17,3 +19,5 @@ insert into memory_search (memory_node_id, memory_content, memory_context)
 select mn.id, mn.content, mc.value
 from memory_nodes mn
 left outer join memory_contexts mc on mc.id = mn.context_id;
+
+PRAGMA foreign_keys=on;
