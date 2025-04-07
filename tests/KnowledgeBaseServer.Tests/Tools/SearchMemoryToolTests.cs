@@ -72,7 +72,7 @@ public class SearchMemoryToolTests : DatabaseTest
         var memories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
             CreateMemoriesTool.Handle(ConnectionString, JsonSerializerOptions.Default, topic, [content], context)
         );
-        Debug.Assert(memories is not null);
+        Debug.Assert(memories is { Length: 1 });
         var expected = JsonSerializer.Deserialize<MemoryDto>(
             GetMemoryByIdTool.Handle(ConnectionString, JsonSerializerOptions.Default, memories[0].Id)
         );
@@ -144,5 +144,32 @@ public class SearchMemoryToolTests : DatabaseTest
 
         // assert
         result.ShouldNotBeNull().Length.ShouldBe(2);
+    }
+
+    [Fact]
+    public void ShouldReturnMatchingMemory_WhenMemoryDoesNotHaveContext()
+    {
+        // arrange
+        var content = _faker.Lorem.Word();
+
+        var memories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
+            CreateMemoriesTool.Handle(
+                ConnectionString,
+                JsonSerializerOptions.Default,
+                _faker.Lorem.Sentence(),
+                [content]
+            )
+        );
+
+        Debug.Assert(memories is { Length: 1 });
+        var expectedMemoryNodeId = memories[0].Id;
+
+        // act
+        var result = JsonSerializer.Deserialize<MemoryDto[]>(
+            SearchMemoryTool.Handle(ConnectionString, JsonSerializerOptions.Default, [content])
+        );
+
+        // assert
+        result.ShouldNotBeNull().ShouldHaveSingleItem().Id.ShouldBe(expectedMemoryNodeId);
     }
 }

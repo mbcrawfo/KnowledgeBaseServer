@@ -56,7 +56,7 @@ public static class SearchMemoryTool
             from search_results sr
             inner join memory_nodes mn on mn.id = sr.memory_node_id
             inner join topics t on t.id = mn.topic_id
-            inner join memory_contexts mc on mc.id = mn.context_id
+            left outer join memory_contexts mc on mc.id = mn.context_id
             """
         );
 

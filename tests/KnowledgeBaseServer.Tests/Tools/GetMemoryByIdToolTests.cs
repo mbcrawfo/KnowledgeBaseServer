@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
 using Bogus;
@@ -11,6 +12,7 @@ namespace KnowledgeBaseServer.Tests.Tools;
 
 public class GetMemoryByIdToolTests : DatabaseTest
 {
+    private readonly Faker _faker = new();
     private readonly Faker<MemoryContext> _memoryContextFaker = MemoryContext.Faker();
     private readonly Faker<MemoryNode> _memoryNodeFaker = MemoryNode.Faker();
     private readonly Faker<MemoryEdge> _memoryEdgeFaker = MemoryEdge.Faker();
@@ -34,14 +36,14 @@ public class GetMemoryByIdToolTests : DatabaseTest
         var expected = new MemoryDto(memory.Id, memory.Created, topic.Name, memory.Content, context.Value);
 
         // act
-        var result = GetMemoryByIdTool.Handle(
-            ConnectionString,
-            JsonSerializerOptions.Default,
-            memory.Id,
-            includeLinkedMemories: false
+        var actual = JsonSerializer.Deserialize<MemoryDto>(
+            GetMemoryByIdTool.Handle(
+                ConnectionString,
+                JsonSerializerOptions.Default,
+                memory.Id,
+                includeLinkedMemories: false
+            )
         );
-
-        var actual = JsonSerializer.Deserialize<MemoryDto>(result);
 
         // assert
         actual.ShouldNotBeNull().ShouldBeEquivalentTo(expected);
@@ -81,16 +83,54 @@ public class GetMemoryByIdToolTests : DatabaseTest
         );
 
         // act
-        var result = GetMemoryByIdTool.Handle(
-            ConnectionString,
-            JsonSerializerOptions.Default,
-            memory.Id,
-            includeLinkedMemories: true
+        var actual = JsonSerializer.Deserialize<MemoryWithRelationsDto>(
+            GetMemoryByIdTool.Handle(
+                ConnectionString,
+                JsonSerializerOptions.Default,
+                memory.Id,
+                includeLinkedMemories: true
+            )
         );
-
-        var actual = JsonSerializer.Deserialize<MemoryWithRelationsDto>(result);
 
         // assert
         actual.ShouldNotBeNull().ShouldBeEquivalentTo(expected);
+    }
+
+    [Fact]
+    public void ShouldReturnMemory_WhenMemoriesDoNotHaveContext()
+    {
+        // arrange
+        var memories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
+            CreateMemoriesTool.Handle(
+                ConnectionString,
+                JsonSerializerOptions.Default,
+                _faker.Lorem.Sentence(),
+                _faker.Lorem.Words(4)
+            )
+        );
+
+        Debug.Assert(memories is { Length: 4 });
+        var sourceMemoryNodeId = memories[0].Id;
+        var targetMemoryNodeIds = memories.Skip(1).Select(m => m.Id).ToArray();
+
+        _ = ConnectMemoriesTool.Handle(ConnectionString, sourceMemoryNodeId, targetMemoryNodeIds);
+
+        // act
+        var result = JsonSerializer.Deserialize<MemoryWithRelationsDto>(
+            GetMemoryByIdTool.Handle(
+                ConnectionString,
+                JsonSerializerOptions.Default,
+                sourceMemoryNodeId,
+                includeLinkedMemories: true
+            )
+        );
+
+        // assert
+        result
+            .ShouldNotBeNull()
+            .ShouldSatisfyAllConditions(
+                () => result.Id.ShouldBe(sourceMemoryNodeId),
+                () => result.LinkedMemories.Select(m => m.Id).ShouldBe(targetMemoryNodeIds, ignoreOrder: true)
+            );
     }
 }

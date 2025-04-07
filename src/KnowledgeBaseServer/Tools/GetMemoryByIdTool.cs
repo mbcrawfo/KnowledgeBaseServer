@@ -27,7 +27,7 @@ public static class GetMemoryByIdTool
             select mn.id, mn.created, t.name as topic, mn.content, mc.value as context
             from memory_nodes mn
             inner join topics t on t.id = mn.topic_id
-            inner join memory_contexts mc on mc.id = mn.context_id
+            left outer join memory_contexts mc on mc.id = mn.context_id
             where mn.id = @Id
             """,
             new { Id = memoryNodeId }
@@ -49,7 +49,7 @@ public static class GetMemoryByIdTool
             from memory_edges me
             inner join memory_nodes mn on mn.id = me.target_memory_node_id
             inner join topics t on t.id = mn.topic_id
-            inner join memory_contexts mc on mc.id = mn.context_id
+            left outer join memory_contexts mc on mc.id = mn.context_id
             where me.source_memory_node_id = @Id
             order by mn.created
             """,
