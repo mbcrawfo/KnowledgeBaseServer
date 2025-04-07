@@ -9,5 +9,7 @@ public sealed record MemoryWithRelationsDto(
     string Topic,
     string Content,
     string? Context,
+    DateTimeOffset? Outdated,
+    string? OutdatedReason,
     IReadOnlyCollection<MemoryDto> LinkedMemories
-) : MemoryDto(Id, Created, Topic, Content, Context);
+) : MemoryDto(Id, Created, Topic, Content, Context, Outdated, OutdatedReason);

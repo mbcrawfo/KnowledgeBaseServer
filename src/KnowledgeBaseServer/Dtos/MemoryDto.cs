@@ -8,5 +8,7 @@ public record MemoryDto(
     DateTimeOffset Created,
     string Topic,
     string Content,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Context
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Context,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] DateTimeOffset? Outdated,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? OutdatedReason
 );

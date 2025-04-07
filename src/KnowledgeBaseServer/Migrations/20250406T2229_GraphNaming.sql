@@ -1,3 +1,5 @@
+-- Renames tables and columns to use graph terminology.
+
 alter table memories rename to memory_nodes;
 
 drop index idx_memory_links_to_memory_id;

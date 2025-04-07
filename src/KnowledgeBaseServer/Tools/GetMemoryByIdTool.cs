@@ -24,7 +24,7 @@ public static class GetMemoryByIdTool
 
         var memory = connection.QuerySingleOrDefault<MemoryDto>(
             sql: """
-            select mn.id, mn.created, t.name as topic, mn.content, mc.value as context
+            select mn.id, mn.created, t.name as topic, mn.content, mc.value as context, mn.outdated, mn.outdated_reason
             from memory_nodes mn
             inner join topics t on t.id = mn.topic_id
             left outer join memory_contexts mc on mc.id = mn.context_id
@@ -45,7 +45,7 @@ public static class GetMemoryByIdTool
 
         var linkedMemories = connection.Query<MemoryDto>(
             sql: """
-            select mn.id, mn.created, t.name as topic, mn.content, mc.value as context
+            select mn.id, mn.created, t.name as topic, mn.content, mc.value as context, mn.outdated, mn.outdated_reason
             from memory_edges me
             inner join memory_nodes mn on mn.id = me.target_memory_node_id
             inner join topics t on t.id = mn.topic_id
@@ -62,6 +62,8 @@ public static class GetMemoryByIdTool
             memory.Topic,
             memory.Content,
             memory.Context,
+            memory.Outdated,
+            memory.OutdatedReason,
             linkedMemories.AsList()
         );
         return JsonSerializer.Serialize(response, jsonSerializerOptions);

@@ -24,7 +24,7 @@ public class GetMemoryByIdToolTests : DatabaseTest
         // arrange
         var topic = _topicFaker.Generate();
         var context = _memoryContextFaker.Generate();
-        var memory = _memoryNodeFaker.WithTopic(topic).WithContext(context).Generate();
+        var memory = _memoryNodeFaker.WithTopic(topic).WithContext(context).WithOutdated().Generate();
 
         using (var seedConnection = ConnectionString.CreateConnection())
         {
@@ -33,7 +33,15 @@ public class GetMemoryByIdToolTests : DatabaseTest
             seedConnection.SeedMemoryNode(memory);
         }
 
-        var expected = new MemoryDto(memory.Id, memory.Created, topic.Name, memory.Content, context.Value);
+        var expected = new MemoryDto(
+            memory.Id,
+            memory.Created,
+            topic.Name,
+            memory.Content,
+            context.Value,
+            memory.Outdated,
+            memory.OutdatedReason
+        );
 
         // act
         var actual = JsonSerializer.Deserialize<MemoryDto>(
@@ -55,7 +63,7 @@ public class GetMemoryByIdToolTests : DatabaseTest
         // arrange
         var topic = _topicFaker.Generate();
         var context = _memoryContextFaker.Generate();
-        var memory = _memoryNodeFaker.WithTopic(topic).WithContext(context).Generate();
+        var memory = _memoryNodeFaker.WithTopic(topic).WithContext(context).WithOutdated().Generate();
         // The topic and context persist on the faker.
         var linkedMemories = _memoryNodeFaker.Generate(3);
         var memoryEdges = linkedMemories
@@ -76,8 +84,18 @@ public class GetMemoryByIdToolTests : DatabaseTest
             topic.Name,
             memory.Content,
             context.Value,
+            memory.Outdated,
+            memory.OutdatedReason,
             linkedMemories
-                .Select(m => new MemoryDto(m.Id, m.Created, topic.Name, m.Content, context.Value))
+                .Select(m => new MemoryDto(
+                    m.Id,
+                    m.Created,
+                    topic.Name,
+                    m.Content,
+                    context.Value,
+                    m.Outdated,
+                    m.OutdatedReason
+                ))
                 .OrderBy(m => m.Created)
                 .ToList()
         );

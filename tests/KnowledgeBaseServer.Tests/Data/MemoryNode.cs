@@ -18,9 +18,9 @@ public sealed class MemoryNode
 
     public required string Content { get; init; }
 
-    public DateTimeOffset? Removed { get; init; }
+    public DateTimeOffset? Outdated { get; init; }
 
-    public string? RemovalReason { get; init; }
+    public string? OutdatedReason { get; init; }
 
     public static Faker<MemoryNode> Faker() =>
         new Faker<MemoryNode>()
@@ -36,6 +36,11 @@ public static partial class FakerExtensions
 
     public static Faker<MemoryNode> WithContext(this Faker<MemoryNode> faker, MemoryContext context) =>
         faker.RuleFor(x => x.ContextId, context.Id);
+
+    public static Faker<MemoryNode> WithOutdated(this Faker<MemoryNode> faker) =>
+        faker
+            .RuleFor(x => x.Outdated, f => f.Date.PastOffset())
+            .RuleFor(x => x.OutdatedReason, f => f.Lorem.Sentence());
 }
 
 public static partial class DbConnectionExtensions
@@ -44,8 +49,8 @@ public static partial class DbConnectionExtensions
     {
         connection.Execute(
             """
-            insert into memory_nodes (id, created, topic_id, context_id, content, removed, removal_reason)
-            values (@Id, @Created, @TopicId, @ContextId, @Content, @Removed, @RemovalReason)
+            insert into memory_nodes (id, created, topic_id, context_id, content, outdated, outdated_reason)
+            values (@Id, @Created, @TopicId, @ContextId, @Content, @Outdated, @OutdatedReason)
             """,
             memoryNodes
         );
@@ -61,7 +66,7 @@ public static partial class DbConnectionExtensions
     )
     {
         var sql = """
-            select id, created, topic_id, context_id, content, removed, removal_reason
+            select id, created, topic_id, context_id, content, outdated, outdated_reason
             from memory_nodes
             """;
         if (where is not null)

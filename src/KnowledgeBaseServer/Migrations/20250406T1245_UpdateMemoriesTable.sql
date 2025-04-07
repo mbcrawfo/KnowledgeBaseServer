@@ -1,3 +1,6 @@
+-- Makes memory context optional.
+-- Adds memory removal information.
+
 PRAGMA foreign_keys=off;
 
 drop index idx_memories_topic_id;
