@@ -27,7 +27,7 @@ public static class CreateMemoriesTool
         [Description("The topic to use for the memories.")] string topic,
         [Description("The text of the memories.")] string[] memories,
         [Description("Optional information to provide context for these memories.")] string? context = null,
-        [Description("Optionally connect the new memories to an existing parent memory.")] Guid? parentMemoryId = null
+        [Description("Optionally connect the new memories to an existing memory node.")] Guid? sourceMemoryNodeId = null
     )
     {
         var now = DateTimeOffset.UtcNow;
@@ -79,7 +79,7 @@ public static class CreateMemoriesTool
             );
         }
 
-        var createdMemories = memories
+        var createdNodes = memories
             .Select(m => new
             {
                 Id = Guid.CreateVersion7(),
@@ -91,19 +91,19 @@ public static class CreateMemoriesTool
             .ToArray();
         connection.Execute(
             sql: """
-            insert into memories (id, created, topic_id, context_id, content) values
+            insert into memory_nodes (id, created, topic_id, context_id, content) values
             (@Id, @Created, @TopicId, @ContextId, @Content)
             """,
-            createdMemories,
+            createdNodes,
             transaction
         );
 
         connection.Execute(
             sql: """
-            insert into memory_search (memory_id, content, context) values
+            insert into memory_search (memory_node_id, memory_content, memory_context) values
             (@MemoryId, @Content, @Context)
             """,
-            createdMemories.Select(m => new
+            createdNodes.Select(m => new
             {
                 MemoryId = m.Id,
                 m.Content,
@@ -112,27 +112,27 @@ public static class CreateMemoriesTool
             transaction
         );
 
-        if (parentMemoryId is not null)
+        if (sourceMemoryNodeId is not null)
         {
             try
             {
                 _ = connection.ConnectMemoriesInternal(
                     transaction,
-                    parentMemoryId.Value,
-                    createdMemories.Select(m => m.Id),
+                    sourceMemoryNodeId.Value,
+                    createdNodes.Select(m => m.Id),
                     now
                 );
             }
             catch (SqliteException ex) when (ex.IsForeignKeyConstraintViolation())
             {
-                return $"Invalid {nameof(parentMemoryId)} provided.";
+                return $"Invalid {nameof(sourceMemoryNodeId)} provided.";
             }
         }
 
         transaction.Commit();
 
         return JsonSerializer.Serialize(
-            createdMemories.Select(m => new CreatedMemoryDto(m.Id, m.Content)).ToArray(),
+            createdNodes.Select(m => new CreatedMemoryDto(m.Id, m.Content)).ToArray(),
             jsonSerializerOptions
         );
     }

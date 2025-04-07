@@ -6,7 +6,7 @@ using Dapper;
 
 namespace KnowledgeBaseServer.Tests.Data;
 
-public sealed class Memory
+public sealed class MemoryNode
 {
     public required Guid Id { get; init; }
 
@@ -22,8 +22,8 @@ public sealed class Memory
 
     public string? RemovalReason { get; init; }
 
-    public static Faker<Memory> Faker() =>
-        new Faker<Memory>()
+    public static Faker<MemoryNode> Faker() =>
+        new Faker<MemoryNode>()
             .RuleFor(x => x.Id, Guid.CreateVersion7)
             .RuleFor(x => x.Created, f => f.Date.PastOffset())
             .RuleFor(x => x.Content, f => f.Lorem.Sentence());
@@ -31,29 +31,30 @@ public sealed class Memory
 
 public static partial class FakerExtensions
 {
-    public static Faker<Memory> WithTopic(this Faker<Memory> faker, Topic topic) =>
+    public static Faker<MemoryNode> WithTopic(this Faker<MemoryNode> faker, Topic topic) =>
         faker.RuleFor(x => x.TopicId, topic.Id);
 
-    public static Faker<Memory> WithContext(this Faker<Memory> faker, MemoryContext context) =>
+    public static Faker<MemoryNode> WithContext(this Faker<MemoryNode> faker, MemoryContext context) =>
         faker.RuleFor(x => x.ContextId, context.Id);
 }
 
 public static partial class DbConnectionExtensions
 {
-    public static void SeedMemories(this IDbConnection connection, IEnumerable<Memory> memories)
+    public static void SeedMemoryNodes(this IDbConnection connection, IEnumerable<MemoryNode> memoryNodes)
     {
         connection.Execute(
             """
-            insert into memories (id, created, topic_id, context_id, content, removed, removal_reason)
+            insert into memory_nodes (id, created, topic_id, context_id, content, removed, removal_reason)
             values (@Id, @Created, @TopicId, @ContextId, @Content, @Removed, @RemovalReason)
             """,
-            memories
+            memoryNodes
         );
     }
 
-    public static void SeedMemory(this IDbConnection connection, Memory memory) => connection.SeedMemories([memory]);
+    public static void SeedMemoryNode(this IDbConnection connection, MemoryNode memoryNode) =>
+        connection.SeedMemoryNodes([memoryNode]);
 
-    public static IReadOnlyList<Memory> GetMemories(
+    public static IReadOnlyList<MemoryNode> GetMemoryNodes(
         this IDbConnection connection,
         string? where = null,
         object? param = null
@@ -61,13 +62,13 @@ public static partial class DbConnectionExtensions
     {
         var sql = """
             select id, created, topic_id, context_id, content, removed, removal_reason
-            from memories
+            from memory_nodes
             """;
         if (where is not null)
         {
             sql += "\n where " + where;
         }
 
-        return connection.Query<Memory>(sql, param).AsList();
+        return connection.Query<MemoryNode>(sql, param).AsList();
     }
 }

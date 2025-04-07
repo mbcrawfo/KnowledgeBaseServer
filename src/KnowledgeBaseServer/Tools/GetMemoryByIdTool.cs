@@ -15,8 +15,8 @@ public static class GetMemoryByIdTool
     public static string Handle(
         ConnectionString connectionString,
         JsonSerializerOptions jsonSerializerOptions,
-        [Description("Id of the memory to retrieve.")] Guid memoryId,
-        [Description("When true, the response include memories linked to the requested memory.")]
+        [Description("Id of the memory node to retrieve.")] Guid memoryNodeId,
+        [Description("When true, include memory nodes linked to the requested memory.")]
             bool includeLinkedMemories = false
     )
     {
@@ -24,13 +24,13 @@ public static class GetMemoryByIdTool
 
         var memory = connection.QuerySingleOrDefault<MemoryDto>(
             sql: """
-            select m.id, m.created, t.name as topic, content, mc.value as context
-            from memories m
-            inner join topics t on t.id = m.topic_id
-            inner join memory_contexts mc on mc.id = m.context_id
-            where m.id = @Id
+            select mn.id, mn.created, t.name as topic, mn.content, mc.value as context
+            from memory_nodes mn
+            inner join topics t on t.id = mn.topic_id
+            inner join memory_contexts mc on mc.id = mn.context_id
+            where mn.id = @Id
             """,
-            new { Id = memoryId }
+            new { Id = memoryNodeId }
         );
 
         if (memory is null)
@@ -45,15 +45,15 @@ public static class GetMemoryByIdTool
 
         var linkedMemories = connection.Query<MemoryDto>(
             sql: """
-            select m.id, m.created, t.name as topic, content, mc.value as context
-            from memory_links ml
-            inner join memories m on m.id = ml.to_memory_id
-            inner join topics t on t.id = m.topic_id
-            inner join memory_contexts mc on mc.id = m.context_id
-            where ml.from_memory_id = @Id
-            order by m.created
+            select mn.id, mn.created, t.name as topic, mn.content, mc.value as context
+            from memory_edges me
+            inner join memory_nodes mn on mn.id = me.target_memory_node_id
+            inner join topics t on t.id = mn.topic_id
+            inner join memory_contexts mc on mc.id = mn.context_id
+            where me.source_memory_node_id = @Id
+            order by mn.created
             """,
-            new { Id = memoryId }
+            new { Id = memoryNodeId }
         );
 
         var response = new MemoryWithRelationsDto(

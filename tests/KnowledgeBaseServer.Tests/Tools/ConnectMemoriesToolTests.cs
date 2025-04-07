@@ -23,8 +23,8 @@ public class ConnectMemoriesToolTests : DatabaseTest
 
         // assert
         using var connection = ConnectionString.CreateConnection();
-        result.ShouldBe("Invalid memory ids provided.");
-        connection.GetMemoryLinks().ShouldBeEmpty();
+        result.ShouldBe("Invalid ids provided.");
+        connection.GetMemoryEdges().ShouldBeEmpty();
     }
 
     [Fact]
@@ -41,28 +41,28 @@ public class ConnectMemoriesToolTests : DatabaseTest
         );
 
         Debug.Assert(memories is { Length: 2 });
-        var parentMemoryId = memories[0].Id;
-        var childMemoryId = memories[1].Id;
+        var sourceMemoryNodeId = memories[0].Id;
+        var targetMemoryNodeId = memories[1].Id;
 
         using (var seedConnection = ConnectionString.CreateConnection())
         {
-            seedConnection.SeedMemoryLink(
-                new MemoryLink
+            seedConnection.SeedMemoryEdge(
+                new MemoryEdge
                 {
                     Created = _faker.Date.PastOffset(),
-                    FromMemoryId = childMemoryId,
-                    ToMemoryId = parentMemoryId,
+                    SourceMemoryNodeId = sourceMemoryNodeId,
+                    TargetMemoryNodeId = targetMemoryNodeId,
                 }
             );
         }
 
         // act
-        var result = ConnectMemoriesTool.Handle(ConnectionString, parentMemoryId, [childMemoryId]);
+        var result = ConnectMemoriesTool.Handle(ConnectionString, sourceMemoryNodeId, [targetMemoryNodeId]);
 
         // assert
         using var connection = ConnectionString.CreateConnection();
         result.ShouldContain("already linked");
-        connection.GetMemoryLinks().ShouldHaveSingleItem();
+        connection.GetMemoryEdges().ShouldHaveSingleItem();
     }
 
     [Fact]
@@ -79,22 +79,26 @@ public class ConnectMemoriesToolTests : DatabaseTest
         );
 
         Debug.Assert(memories is { Length: 3 });
-        var parentMemoryId = memories[0].Id;
-        var child1MemoryId = memories[1].Id;
-        var child2MemoryId = memories[2].Id;
+        var sourceMemoryNodeId = memories[0].Id;
+        var targetMemoryNodeId1 = memories[1].Id;
+        var targetMemoryNodeId2 = memories[2].Id;
 
         // act
-        var result = ConnectMemoriesTool.Handle(ConnectionString, parentMemoryId, [child1MemoryId, child2MemoryId]);
+        var result = ConnectMemoriesTool.Handle(
+            ConnectionString,
+            sourceMemoryNodeId,
+            [targetMemoryNodeId1, targetMemoryNodeId2]
+        );
 
         using var connection = ConnectionString.CreateConnection();
-        var actualMemoryLinks = connection.GetMemoryLinks();
+        var actualMemoryLinks = connection.GetMemoryEdges();
 
         // assert
         result.ShouldBe("Memories linked successfully.");
         actualMemoryLinks.ShouldSatisfyAllConditions(
-            () => actualMemoryLinks.ShouldContain(ml => ml.ToMemoryId == parentMemoryId, expectedCount: 2),
-            () => actualMemoryLinks.ShouldContain(ml => ml.FromMemoryId == child1MemoryId, expectedCount: 1),
-            () => actualMemoryLinks.ShouldContain(ml => ml.FromMemoryId == child2MemoryId, expectedCount: 1)
+            () => actualMemoryLinks.ShouldContain(ml => ml.SourceMemoryNodeId == sourceMemoryNodeId, expectedCount: 2),
+            () => actualMemoryLinks.ShouldContain(ml => ml.TargetMemoryNodeId == targetMemoryNodeId1, expectedCount: 1),
+            () => actualMemoryLinks.ShouldContain(ml => ml.TargetMemoryNodeId == targetMemoryNodeId2, expectedCount: 1)
         );
     }
 }

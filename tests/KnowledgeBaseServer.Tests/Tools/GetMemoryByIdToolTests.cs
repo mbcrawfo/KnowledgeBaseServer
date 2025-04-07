@@ -12,8 +12,8 @@ namespace KnowledgeBaseServer.Tests.Tools;
 public class GetMemoryByIdToolTests : DatabaseTest
 {
     private readonly Faker<MemoryContext> _memoryContextFaker = MemoryContext.Faker();
-    private readonly Faker<Memory> _memoryFaker = Memory.Faker();
-    private readonly Faker<MemoryLink> _memoryLinkFaker = MemoryLink.Faker();
+    private readonly Faker<MemoryNode> _memoryNodeFaker = MemoryNode.Faker();
+    private readonly Faker<MemoryEdge> _memoryEdgeFaker = MemoryEdge.Faker();
     private readonly Faker<Topic> _topicFaker = Topic.Faker();
 
     [Fact]
@@ -22,13 +22,13 @@ public class GetMemoryByIdToolTests : DatabaseTest
         // arrange
         var topic = _topicFaker.Generate();
         var context = _memoryContextFaker.Generate();
-        var memory = _memoryFaker.WithTopic(topic).WithContext(context).Generate();
+        var memory = _memoryNodeFaker.WithTopic(topic).WithContext(context).Generate();
 
         using (var seedConnection = ConnectionString.CreateConnection())
         {
             seedConnection.SeedTopic(topic);
             seedConnection.SeedMemoryContext(context);
-            seedConnection.SeedMemory(memory);
+            seedConnection.SeedMemoryNode(memory);
         }
 
         var expected = new MemoryDto(memory.Id, memory.Created, topic.Name, memory.Content, context.Value);
@@ -53,19 +53,19 @@ public class GetMemoryByIdToolTests : DatabaseTest
         // arrange
         var topic = _topicFaker.Generate();
         var context = _memoryContextFaker.Generate();
-        var memory = _memoryFaker.WithTopic(topic).WithContext(context).Generate();
+        var memory = _memoryNodeFaker.WithTopic(topic).WithContext(context).Generate();
         // The topic and context persist on the faker.
-        var linkedMemories = _memoryFaker.Generate(3);
-        var memoryLinks = linkedMemories
-            .Select(m => _memoryLinkFaker.Clone().WithMemories(memory, m).Generate())
+        var linkedMemories = _memoryNodeFaker.Generate(3);
+        var memoryEdges = linkedMemories
+            .Select(m => _memoryEdgeFaker.Clone().WithNodes(memory, m).Generate())
             .ToArray();
 
         using (var seedConnection = ConnectionString.CreateConnection())
         {
             seedConnection.SeedTopic(topic);
             seedConnection.SeedMemoryContext(context);
-            seedConnection.SeedMemories([memory, .. linkedMemories]);
-            seedConnection.SeedMemoryLinks(memoryLinks);
+            seedConnection.SeedMemoryNodes([memory, .. linkedMemories]);
+            seedConnection.SeedMemoryEdges(memoryEdges);
         }
 
         var expected = new MemoryWithRelationsDto(

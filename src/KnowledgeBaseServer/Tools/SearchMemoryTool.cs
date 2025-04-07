@@ -17,7 +17,7 @@ public static class SearchMemoryTool
     private const int MaxMaxResults = 50;
 
     [McpServerTool(Name = "SearchMemory", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false)]
-    [Description("Searches for memories in the knowledge base.")]
+    [Description("Performs a search for memories in the knowledge base.")]
     public static string Handle(
         ConnectionString connectionString,
         JsonSerializerOptions jsonSerializerOptions,
@@ -48,15 +48,15 @@ public static class SearchMemoryTool
         var sb = new StringBuilder(
             """
             with search_results as (
-              select memory_id, rank
+              select memory_node_id, rank
               from memory_search
               where memory_search match @Phrases
             )
-            select m.id, m.created, t.name as topic, m.content, mc.value as context
+            select mn.id, mn.created, t.name as topic, mn.content, mc.value as context
             from search_results sr
-            inner join memories m on m.id = sr.memory_id
-            inner join topics t on t.id = m.topic_id
-            inner join memory_contexts mc on mc.id = m.context_id
+            inner join memory_nodes mn on mn.id = sr.memory_node_id
+            inner join topics t on t.id = mn.topic_id
+            inner join memory_contexts mc on mc.id = mn.context_id
             """
         );
 

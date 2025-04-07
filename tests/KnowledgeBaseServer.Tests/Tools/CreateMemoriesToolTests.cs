@@ -38,7 +38,7 @@ public class CreateMemoriesToolTests : DatabaseTest
         using var connection = ConnectionString.CreateConnection();
         connection.GetTopics().ShouldHaveSingleItem().Name.ShouldBe(expectedTopic);
         connection.GetMemoryContexts().ShouldHaveSingleItem().Value.ShouldBe(expectedContext);
-        connection.GetMemories().ShouldHaveSingleItem().Content.ShouldBe(expectedMemory);
+        connection.GetMemoryNodes().ShouldHaveSingleItem().Content.ShouldBe(expectedMemory);
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public class CreateMemoriesToolTests : DatabaseTest
         using var connection = ConnectionString.CreateConnection();
         connection.GetTopics().ShouldHaveSingleItem().Name.ShouldBe(expectedTopic.Name);
         connection.GetMemoryContexts().ShouldHaveSingleItem().Value.ShouldBe(expectedContext);
-        connection.GetMemories().ShouldHaveSingleItem().Content.ShouldBe(expectedMemory);
+        connection.GetMemoryNodes().ShouldHaveSingleItem().Content.ShouldBe(expectedMemory);
     }
 
     [Fact]
@@ -85,8 +85,8 @@ public class CreateMemoriesToolTests : DatabaseTest
         using var connection = ConnectionString.CreateConnection();
         connection.GetTopics().ShouldHaveSingleItem().Name.ShouldBe(topic);
         connection.GetMemoryContexts().ShouldBeEmpty();
-        connection.GetMemoryLinks().ShouldBeEmpty();
-        connection.GetMemories().ShouldHaveSingleItem().Content.ShouldBe(expectedMemory);
+        connection.GetMemoryEdges().ShouldBeEmpty();
+        connection.GetMemoryNodes().ShouldHaveSingleItem().Content.ShouldBe(expectedMemory);
     }
 
     [Fact]
@@ -112,9 +112,9 @@ public class CreateMemoriesToolTests : DatabaseTest
         var memorySearches = connection
             .Query<MemorySearch>(
                 """
-                select memory_id, content, context
+                select memory_node_id, memory_content, memory_context
                 from memory_search
-                where content match @Word
+                where memory_content match @Word
                 """,
                 new { Word = searchWord }
             )
@@ -125,8 +125,8 @@ public class CreateMemoriesToolTests : DatabaseTest
             .ShouldNotBeNull()
             .ShouldHaveSingleItem()
             .ShouldSatisfyAllConditions(
-                () => memorySearches[0].Content.ShouldBe(expectedMemory),
-                () => memorySearches[0].Context.ShouldBe(expectedContext)
+                () => memorySearches[0].MemoryContent.ShouldBe(expectedMemory),
+                () => memorySearches[0].MemoryContext.ShouldBe(expectedContext)
             );
     }
 
@@ -141,23 +141,23 @@ public class CreateMemoriesToolTests : DatabaseTest
             JsonSerializerOptions.Default,
             _faker.Lorem.Sentence(),
             [_faker.Lorem.Sentence()],
-            parentMemoryId: _faker.Random.Guid()
+            sourceMemoryNodeId: _faker.Random.Guid()
         );
 
         // assert
-        result.ShouldBe("Invalid parentMemoryId provided.");
+        result.ShouldBe("Invalid sourceMemoryNodeId provided.");
         using var connection = ConnectionString.CreateConnection();
         connection.GetTopics().ShouldBeEmpty();
         connection.GetMemoryContexts().ShouldBeEmpty();
-        connection.GetMemories().ShouldBeEmpty();
-        connection.GetMemoryLinks().ShouldBeEmpty();
+        connection.GetMemoryNodes().ShouldBeEmpty();
+        connection.GetMemoryEdges().ShouldBeEmpty();
     }
 
     [Fact]
     public void ShouldLinkNewMemories_WhenParentMemoryIdProvided()
     {
         // arrange
-        var parentMemories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
+        var sourceMemories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
             CreateMemoriesTool.Handle(
                 ConnectionString,
                 JsonSerializerOptions.Default,
@@ -165,26 +165,26 @@ public class CreateMemoriesToolTests : DatabaseTest
                 [_faker.Lorem.Sentence()]
             )
         );
-        Debug.Assert(parentMemories is { Length: 1 });
-        var parentMemoryId = parentMemories[0].Id;
+        Debug.Assert(sourceMemories is { Length: 1 });
+        var sourceMemoryNodeId = sourceMemories[0].Id;
 
         // act
-        var childMemories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
+        var targetMemories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
             CreateMemoriesTool.Handle(
                 ConnectionString,
                 JsonSerializerOptions.Default,
                 _faker.Lorem.Sentence(),
                 [_faker.Lorem.Sentence()],
-                parentMemoryId: parentMemoryId
+                sourceMemoryNodeId: sourceMemoryNodeId
             )
         );
 
         // assert
-        var childMemoryId = childMemories.ShouldNotBeNull().ShouldHaveSingleItem().Id;
+        var targetMemoryNodeId = targetMemories.ShouldNotBeNull().ShouldHaveSingleItem().Id;
         using var connection = ConnectionString.CreateConnection();
-        var memoryLink = connection.GetMemoryLinks().ShouldHaveSingleItem();
-        memoryLink.FromMemoryId.ShouldBe(childMemoryId);
-        memoryLink.ToMemoryId.ShouldBe(parentMemoryId);
+        var memoryEdge = connection.GetMemoryEdges().ShouldHaveSingleItem();
+        memoryEdge.SourceMemoryNodeId.ShouldBe(sourceMemoryNodeId);
+        memoryEdge.TargetMemoryNodeId.ShouldBe(targetMemoryNodeId);
     }
 
     [Fact]
@@ -206,7 +206,7 @@ public class CreateMemoriesToolTests : DatabaseTest
         );
 
         using var connection = ConnectionString.CreateConnection();
-        var expectedMemories = connection.GetMemories().Select(m => new CreatedMemoryDto(m.Id, m.Content));
+        var expectedMemories = connection.GetMemoryNodes().Select(m => new CreatedMemoryDto(m.Id, m.Content));
 
         // assert
         actualMemories.ShouldBe(expectedMemories);
