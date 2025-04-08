@@ -17,12 +17,12 @@ public static class CreateMemoryTool
         ConnectionString connectionString,
         [Description("The topic to use for the memory.")] string topic,
         [Description("The text of the memory.")] string memory,
-        [Description("The importance of the memory, between 0 and 100.  Default: 50")] int importance = 50,
+        [Description("The importance of the memory, between 0 and 1.  Default: 0.5")] double importance = 0.5,
         [Description("Optional information to provide context for the memory.")] string? context = null,
         [Description("Optionally connect the new memory to an existing memory node.")] Guid? sourceMemoryNodeId = null
     )
     {
-        if (importance is < 0 or > 100)
+        if (importance is < 0 or > 1)
         {
             return $"{nameof(importance)} must be between 0 and 100.";
         }

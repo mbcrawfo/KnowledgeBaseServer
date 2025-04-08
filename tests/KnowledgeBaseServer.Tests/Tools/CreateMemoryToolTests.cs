@@ -40,7 +40,7 @@ public class CreateMemoryToolTests : DatabaseTest
         var expectedTopic = _faker.Lorem.Sentence();
         var expectedMemory = _faker.Lorem.Sentence();
         var expectedContext = _faker.Lorem.Sentence();
-        var expectedImportance = _faker.Random.Int(0, 100);
+        var expectedImportance = _faker.Random.Double();
 
         // act
         _ = CreateMemoryTool.Handle(
@@ -76,7 +76,7 @@ public class CreateMemoryToolTests : DatabaseTest
 
         var expectedMemory = _faker.Lorem.Sentence();
         var expectedContext = _faker.Lorem.Sentence();
-        var expectedImportance = _faker.Random.Int(0, 100);
+        var expectedImportance = _faker.Random.Double();
 
         // act
         _ = CreateMemoryTool.Handle(

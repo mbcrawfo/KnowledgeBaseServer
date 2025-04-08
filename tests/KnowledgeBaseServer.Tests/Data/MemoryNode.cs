@@ -22,14 +22,14 @@ public sealed class MemoryNode
 
     public string? OutdatedReason { get; init; }
 
-    public required int Importance { get; init; }
+    public required double Importance { get; init; }
 
     public static Faker<MemoryNode> Faker() =>
         new Faker<MemoryNode>()
             .RuleFor(x => x.Id, Guid.CreateVersion7)
             .RuleFor(x => x.Created, f => f.Date.PastOffset())
             .RuleFor(x => x.Content, f => f.Lorem.Sentence())
-            .RuleFor(x => x.Importance, f => f.Random.Int(min: 0, max: 100));
+            .RuleFor(x => x.Importance, f => f.Random.Double());
 }
 
 public static partial class FakerExtensions
