@@ -61,7 +61,7 @@ public class SearchMemoryToolTests : DatabaseTest
         var searchPhrase = _faker.PickRandom(content.Split(' '));
 
         var memoryNodeId = AppJsonSerializer
-            .Deserialize<CreatedMemoryDto>(CreateMemoryTool.Handle(ConnectionString, topic, content, context))
+            .Deserialize<CreatedMemoryDto>(CreateMemoryTool.Handle(ConnectionString, topic, content, context: context))
             .Id;
         var expected = AppJsonSerializer.Deserialize<MemoryDto>(
             GetMemoryByIdTool.Handle(ConnectionString, memoryNodeId)
@@ -87,7 +87,7 @@ public class SearchMemoryToolTests : DatabaseTest
         {
             foreach (var m in _faker.Make(count: 3, () => _faker.Lorem.Sentence()))
             {
-                _ = CreateMemoryTool.Handle(ConnectionString, topic, m, _faker.Lorem.Sentence());
+                _ = CreateMemoryTool.Handle(ConnectionString, topic, m, context: _faker.Lorem.Sentence());
             }
         }
 
@@ -110,7 +110,7 @@ public class SearchMemoryToolTests : DatabaseTest
 
         foreach (var m in _faker.Make(count: 3, () => _faker.Lorem.Sentence() + searchPhrase))
         {
-            _ = CreateMemoryTool.Handle(ConnectionString, _faker.Lorem.Word(), m, _faker.Lorem.Sentence());
+            _ = CreateMemoryTool.Handle(ConnectionString, _faker.Lorem.Word(), m, context: _faker.Lorem.Sentence());
         }
 
         // act

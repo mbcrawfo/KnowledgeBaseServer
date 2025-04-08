@@ -17,10 +17,16 @@ public static class CreateMemoryTool
         ConnectionString connectionString,
         [Description("The topic to use for the memory.")] string topic,
         [Description("The text of the memory.")] string memory,
+        [Description("The importance of the memory, between 0 and 100.  Default: 50")] int importance = 50,
         [Description("Optional information to provide context for the memory.")] string? context = null,
         [Description("Optionally connect the new memory to an existing memory node.")] Guid? sourceMemoryNodeId = null
     )
     {
+        if (importance is < 0 or > 100)
+        {
+            return $"{nameof(importance)} must be between 0 and 100.";
+        }
+
         var now = DateTimeOffset.UtcNow;
         using var connection = connectionString.CreateConnection();
         using var transaction = connection.BeginTransaction();
@@ -77,11 +83,12 @@ public static class CreateMemoryTool
             TopicId = topicId,
             ContextId = contextId,
             Content = memory,
+            Importance = importance,
         };
         _ = connection.Execute(
             sql: """
-            insert into memory_nodes (id, created, topic_id, context_id, content) values
-            (@Id, @Created, @TopicId, @ContextId, @Content)
+            insert into memory_nodes (id, created, topic_id, context_id, content, importance) values
+            (@Id, @Created, @TopicId, @ContextId, @Content, @Importance)
             """,
             createdNode,
             transaction

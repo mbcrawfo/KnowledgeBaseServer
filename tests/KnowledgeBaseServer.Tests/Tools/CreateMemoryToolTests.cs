@@ -14,6 +14,25 @@ public class CreateMemoryToolTests : DatabaseTest
     private readonly Faker _faker = new();
     private readonly Faker<Topic> _topicFaker = Topic.Faker();
 
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(101)]
+    public void ShouldReturnError_WhenImportanceIsOutOfRange(int importance)
+    {
+        // arrange
+
+        // act
+        var result = CreateMemoryTool.Handle(
+            ConnectionString,
+            _faker.Lorem.Word(),
+            _faker.Lorem.Sentence(),
+            importance
+        );
+
+        // assert
+        result.ShouldBe("importance must be between 0 and 100.");
+    }
+
     [Fact]
     public void ShouldCreateTopicAndMemory_WhenTopicDoesNotExist()
     {
@@ -21,15 +40,28 @@ public class CreateMemoryToolTests : DatabaseTest
         var expectedTopic = _faker.Lorem.Sentence();
         var expectedMemory = _faker.Lorem.Sentence();
         var expectedContext = _faker.Lorem.Sentence();
+        var expectedImportance = _faker.Random.Int(0, 100);
 
         // act
-        _ = CreateMemoryTool.Handle(ConnectionString, expectedTopic, expectedMemory, expectedContext);
+        _ = CreateMemoryTool.Handle(
+            ConnectionString,
+            expectedTopic,
+            expectedMemory,
+            expectedImportance,
+            expectedContext
+        );
 
         // assert
         using var connection = ConnectionString.CreateConnection();
         connection.GetTopics().ShouldHaveSingleItem().Name.ShouldBe(expectedTopic);
         connection.GetMemoryContexts().ShouldHaveSingleItem().Value.ShouldBe(expectedContext);
-        connection.GetMemoryNodes().ShouldHaveSingleItem().Content.ShouldBe(expectedMemory);
+        connection
+            .GetMemoryNodes()
+            .ShouldHaveSingleItem()
+            .ShouldSatisfyAllConditions(
+                x => x.Content.ShouldBe(expectedMemory),
+                x => x.Importance.ShouldBe(expectedImportance)
+            );
     }
 
     [Fact]
@@ -44,15 +76,28 @@ public class CreateMemoryToolTests : DatabaseTest
 
         var expectedMemory = _faker.Lorem.Sentence();
         var expectedContext = _faker.Lorem.Sentence();
+        var expectedImportance = _faker.Random.Int(0, 100);
 
         // act
-        _ = CreateMemoryTool.Handle(ConnectionString, expectedTopic.Name, expectedMemory, expectedContext);
+        _ = CreateMemoryTool.Handle(
+            ConnectionString,
+            expectedTopic.Name,
+            expectedMemory,
+            expectedImportance,
+            expectedContext
+        );
 
         // assert
         using var connection = ConnectionString.CreateConnection();
         connection.GetTopics().ShouldHaveSingleItem().Name.ShouldBe(expectedTopic.Name);
         connection.GetMemoryContexts().ShouldHaveSingleItem().Value.ShouldBe(expectedContext);
-        connection.GetMemoryNodes().ShouldHaveSingleItem().Content.ShouldBe(expectedMemory);
+        connection
+            .GetMemoryNodes()
+            .ShouldHaveSingleItem()
+            .ShouldSatisfyAllConditions(
+                x => x.Content.ShouldBe(expectedMemory),
+                x => x.Importance.ShouldBe(expectedImportance)
+            );
     }
 
     [Fact]
@@ -84,7 +129,7 @@ public class CreateMemoryToolTests : DatabaseTest
         var searchWord = _faker.PickRandom(expectedMemory.Split(' ')).RemovePunctuation();
 
         // act
-        _ = CreateMemoryTool.Handle(ConnectionString, topic, expectedMemory, expectedContext);
+        _ = CreateMemoryTool.Handle(ConnectionString, topic, expectedMemory, context: expectedContext);
 
         using var connection = ConnectionString.CreateConnection();
         var memorySearches = connection
@@ -177,7 +222,7 @@ public class CreateMemoryToolTests : DatabaseTest
 
         // act
         var actualMemory = AppJsonSerializer.Deserialize<CreatedMemoryDto>(
-            CreateMemoryTool.Handle(ConnectionString, topic.Name, memory, context)
+            CreateMemoryTool.Handle(ConnectionString, topic.Name, memory, context: context)
         );
 
         // assert
