@@ -28,10 +28,11 @@ public class MarkMemoryAsOutdatedToolTests : DatabaseTest
     public void ShouldUpdateMemoryNode()
     {
         // arrange
-        var memories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoriesTool.Handle(ConnectionString, _faker.Lorem.Sentence(), [_faker.Lorem.Sentence()])
-        );
-        var memoryNodeId = memories[0].Id;
+        var memoryNodeId = AppJsonSerializer
+            .Deserialize<CreatedMemoryDto>(
+                CreateMemoryTool.Handle(ConnectionString, _faker.Lorem.Sentence(), _faker.Lorem.Sentence())
+            )
+            .Id;
         var expectedReason = _faker.Lorem.Sentence();
 
         // act
@@ -49,10 +50,11 @@ public class MarkMemoryAsOutdatedToolTests : DatabaseTest
     public void ShouldNotModifyMemoryNode_WhenNodeIsAlreadyOutdated()
     {
         // arrange
-        var memories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoriesTool.Handle(ConnectionString, _faker.Lorem.Sentence(), [_faker.Lorem.Sentence()])
-        );
-        var memoryNodeId = memories[0].Id;
+        var memoryNodeId = AppJsonSerializer
+            .Deserialize<CreatedMemoryDto>(
+                CreateMemoryTool.Handle(ConnectionString, _faker.Lorem.Sentence(), _faker.Lorem.Sentence())
+            )
+            .Id;
 
         _ = MarkMemoryAsOutdatedTool.Handle(ConnectionString, memoryNodeId, _faker.Lorem.Sentence());
         MemoryNode? expectedMemoryNode;

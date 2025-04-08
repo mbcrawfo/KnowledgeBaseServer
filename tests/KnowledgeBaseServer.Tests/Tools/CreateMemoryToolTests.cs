@@ -1,4 +1,3 @@
-using System.Linq;
 using Bogus;
 using Dapper;
 using KnowledgeBaseServer.Dtos;
@@ -10,7 +9,7 @@ using Xunit;
 
 namespace KnowledgeBaseServer.Tests.Tools;
 
-public class CreateMemoriesToolTests : DatabaseTest
+public class CreateMemoryToolTests : DatabaseTest
 {
     private readonly Faker _faker = new();
     private readonly Faker<Topic> _topicFaker = Topic.Faker();
@@ -24,7 +23,7 @@ public class CreateMemoriesToolTests : DatabaseTest
         var expectedContext = _faker.Lorem.Sentence();
 
         // act
-        _ = CreateMemoriesTool.Handle(ConnectionString, expectedTopic, [expectedMemory], expectedContext);
+        _ = CreateMemoryTool.Handle(ConnectionString, expectedTopic, expectedMemory, expectedContext);
 
         // assert
         using var connection = ConnectionString.CreateConnection();
@@ -47,7 +46,7 @@ public class CreateMemoriesToolTests : DatabaseTest
         var expectedContext = _faker.Lorem.Sentence();
 
         // act
-        _ = CreateMemoriesTool.Handle(ConnectionString, expectedTopic.Name, [expectedMemory], expectedContext);
+        _ = CreateMemoryTool.Handle(ConnectionString, expectedTopic.Name, expectedMemory, expectedContext);
 
         // assert
         using var connection = ConnectionString.CreateConnection();
@@ -64,7 +63,7 @@ public class CreateMemoriesToolTests : DatabaseTest
         var expectedMemory = _faker.Lorem.Sentence();
 
         // act
-        _ = CreateMemoriesTool.Handle(ConnectionString, topic, [expectedMemory]);
+        _ = CreateMemoryTool.Handle(ConnectionString, topic, expectedMemory);
 
         // assert
         using var connection = ConnectionString.CreateConnection();
@@ -85,7 +84,7 @@ public class CreateMemoriesToolTests : DatabaseTest
         var searchWord = _faker.PickRandom(expectedMemory.Split(' ')).RemovePunctuation();
 
         // act
-        _ = CreateMemoriesTool.Handle(ConnectionString, topic, [expectedMemory], expectedContext);
+        _ = CreateMemoryTool.Handle(ConnectionString, topic, expectedMemory, expectedContext);
 
         using var connection = ConnectionString.CreateConnection();
         var memorySearches = connection
@@ -114,10 +113,10 @@ public class CreateMemoriesToolTests : DatabaseTest
         // arrange
 
         // act
-        var result = CreateMemoriesTool.Handle(
+        var result = CreateMemoryTool.Handle(
             ConnectionString,
             _faker.Lorem.Sentence(),
-            [_faker.Lorem.Sentence()],
+            _faker.Lorem.Sentence(),
             sourceMemoryNodeId: _faker.Random.Guid()
         );
 
@@ -131,34 +130,40 @@ public class CreateMemoriesToolTests : DatabaseTest
     }
 
     [Fact]
-    public void ShouldLinkNewMemories_WhenParentMemoryIdProvided()
+    public void ShouldLinkNewMemory_WhenSourceMemoryIdProvided()
     {
         // arrange
-        var sourceMemories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoriesTool.Handle(ConnectionString, _faker.Lorem.Sentence(), [_faker.Lorem.Sentence()])
-        );
-        var sourceMemoryNodeId = sourceMemories[0].Id;
+        var sourceMemoryNodeId = AppJsonSerializer
+            .Deserialize<CreatedMemoryDto>(
+                CreateMemoryTool.Handle(ConnectionString, _faker.Lorem.Sentence(), _faker.Lorem.Sentence())
+            )
+            .Id;
 
         // act
-        var targetMemories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoriesTool.Handle(
-                ConnectionString,
-                _faker.Lorem.Sentence(),
-                [_faker.Lorem.Sentence()],
-                sourceMemoryNodeId: sourceMemoryNodeId
+        var targetMemoryNodeId = AppJsonSerializer
+            .Deserialize<CreatedMemoryDto>(
+                CreateMemoryTool.Handle(
+                    ConnectionString,
+                    _faker.Lorem.Sentence(),
+                    _faker.Lorem.Sentence(),
+                    sourceMemoryNodeId: sourceMemoryNodeId
+                )
             )
-        );
+            .Id;
 
         // assert
-        var targetMemoryNodeId = targetMemories.ShouldNotBeNull().ShouldHaveSingleItem().Id;
         using var connection = ConnectionString.CreateConnection();
-        var memoryEdge = connection.GetMemoryEdges().ShouldHaveSingleItem();
-        memoryEdge.SourceMemoryNodeId.ShouldBe(sourceMemoryNodeId);
-        memoryEdge.TargetMemoryNodeId.ShouldBe(targetMemoryNodeId);
+        connection
+            .GetMemoryEdges()
+            .ShouldHaveSingleItem()
+            .ShouldSatisfyAllConditions(
+                x => x.SourceMemoryNodeId.ShouldBe(sourceMemoryNodeId),
+                x => x.TargetMemoryNodeId.ShouldBe(targetMemoryNodeId)
+            );
     }
 
     [Fact]
-    public void ShouldReturnNewMemoriesWithIds()
+    public void ShouldReturnNewMemoryWithId()
     {
         // arrange
         var topic = _topicFaker.Generate();
@@ -167,18 +172,20 @@ public class CreateMemoriesToolTests : DatabaseTest
             seedConnection.SeedTopic(topic);
         }
 
-        var memories = _faker.Lorem.Sentences(3);
+        var memory = _faker.Lorem.Sentence();
         var context = _faker.Lorem.Sentence();
 
         // act
-        var actualMemories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoriesTool.Handle(ConnectionString, topic.Name, [memories], context)
+        var actualMemory = AppJsonSerializer.Deserialize<CreatedMemoryDto>(
+            CreateMemoryTool.Handle(ConnectionString, topic.Name, memory, context)
         );
 
-        using var connection = ConnectionString.CreateConnection();
-        var expectedMemories = connection.GetMemoryNodes().Select(m => new CreatedMemoryDto(m.Id, m.Content));
-
         // assert
-        actualMemories.ShouldBe(expectedMemories);
+        using var connection = ConnectionString.CreateConnection();
+        var expectedMemoryNode = connection.GetMemoryNodes().ShouldHaveSingleItem();
+        actualMemory.ShouldSatisfyAllConditions(
+            m => m.Id.ShouldBe(expectedMemoryNode.Id),
+            m => m.Content.ShouldBe(memory)
+        );
     }
 }

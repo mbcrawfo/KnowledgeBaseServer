@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel;
-using System.Linq;
 using Dapper;
 using KnowledgeBaseServer.Dtos;
 using KnowledgeBaseServer.Extensions;
@@ -10,22 +9,16 @@ using ModelContextProtocol.Server;
 namespace KnowledgeBaseServer.Tools;
 
 [McpServerToolType]
-public static class CreateMemoriesTool
+public static class CreateMemoryTool
 {
-    [McpServerTool(
-        Name = "CreateMemories",
-        ReadOnly = false,
-        Destructive = false,
-        Idempotent = false,
-        OpenWorld = false
-    )]
-    [Description("Create new memories in the knowledge base.")]
+    [McpServerTool(Name = "CreateMemory", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false)]
+    [Description("Creates a new memory in the knowledge base.")]
     public static string Handle(
         ConnectionString connectionString,
-        [Description("The topic to use for the memories.")] string topic,
-        [Description("The text of the memories.")] string[] memories,
-        [Description("Optional information to provide context for these memories.")] string? context = null,
-        [Description("Optionally connect the new memories to an existing memory node.")] Guid? sourceMemoryNodeId = null
+        [Description("The topic to use for the memory.")] string topic,
+        [Description("The text of the memory.")] string memory,
+        [Description("Optional information to provide context for the memory.")] string? context = null,
+        [Description("Optionally connect the new memory to an existing memory node.")] Guid? sourceMemoryNodeId = null
     )
     {
         var now = DateTimeOffset.UtcNow;
@@ -77,22 +70,20 @@ public static class CreateMemoriesTool
             );
         }
 
-        var createdNodes = memories
-            .Select(m => new
-            {
-                Id = Guid.CreateVersion7(),
-                Created = now,
-                TopicId = topicId,
-                ContextId = contextId,
-                Content = m,
-            })
-            .ToArray();
+        var createdNode = new
+        {
+            Id = Guid.CreateVersion7(),
+            Created = now,
+            TopicId = topicId,
+            ContextId = contextId,
+            Content = memory,
+        };
         _ = connection.Execute(
             sql: """
             insert into memory_nodes (id, created, topic_id, context_id, content) values
             (@Id, @Created, @TopicId, @ContextId, @Content)
             """,
-            createdNodes,
+            createdNode,
             transaction
         );
 
@@ -101,12 +92,12 @@ public static class CreateMemoriesTool
             insert into memory_search (memory_node_id, memory_content, memory_context) values
             (@MemoryId, @Content, @Context)
             """,
-            createdNodes.Select(m => new
+            new
             {
-                MemoryId = m.Id,
-                m.Content,
+                MemoryId = createdNode.Id,
+                Content = memory,
                 Context = context,
-            }),
+            },
             transaction
         );
 
@@ -114,12 +105,7 @@ public static class CreateMemoriesTool
         {
             try
             {
-                _ = connection.ConnectMemoriesInternal(
-                    transaction,
-                    sourceMemoryNodeId.Value,
-                    createdNodes.Select(m => m.Id),
-                    now
-                );
+                _ = connection.ConnectMemoriesInternal(transaction, sourceMemoryNodeId.Value, [createdNode.Id], now);
             }
             catch (SqliteException ex) when (ex.IsForeignKeyConstraintViolation())
             {
@@ -129,6 +115,6 @@ public static class CreateMemoriesTool
 
         transaction.Commit();
 
-        return AppJsonSerializer.Serialize(createdNodes.Select(m => new CreatedMemoryDto(m.Id, m.Content)).ToArray());
+        return AppJsonSerializer.Serialize(new CreatedMemoryDto(createdNode.Id, createdNode.Content));
     }
 }

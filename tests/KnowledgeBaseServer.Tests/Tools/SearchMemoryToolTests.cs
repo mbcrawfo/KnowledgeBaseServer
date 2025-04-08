@@ -1,4 +1,3 @@
-using System.Linq;
 using Bogus;
 using KnowledgeBaseServer.Dtos;
 using KnowledgeBaseServer.Tools;
@@ -61,11 +60,11 @@ public class SearchMemoryToolTests : DatabaseTest
         var context = _faker.Lorem.Sentence();
         var searchPhrase = _faker.PickRandom(content.Split(' '));
 
-        var memories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoriesTool.Handle(ConnectionString, topic, [content], context)
-        );
+        var memoryNodeId = AppJsonSerializer
+            .Deserialize<CreatedMemoryDto>(CreateMemoryTool.Handle(ConnectionString, topic, content, context))
+            .Id;
         var expected = AppJsonSerializer.Deserialize<MemoryDto>(
-            GetMemoryByIdTool.Handle(ConnectionString, memories[0].Id)
+            GetMemoryByIdTool.Handle(ConnectionString, memoryNodeId)
         );
 
         // act
@@ -86,11 +85,10 @@ public class SearchMemoryToolTests : DatabaseTest
 
         foreach (var topic in topics)
         {
-            var memories = Enumerable
-                .Range(start: 0, count: 3)
-                .Select(_ => _faker.Lorem.Sentence() + searchPhrase)
-                .ToArray();
-            _ = CreateMemoriesTool.Handle(ConnectionString, topic, memories, _faker.Lorem.Sentence());
+            foreach (var m in _faker.Make(count: 3, () => _faker.Lorem.Sentence()))
+            {
+                _ = CreateMemoryTool.Handle(ConnectionString, topic, m, _faker.Lorem.Sentence());
+            }
         }
 
         var expectedTopic = _faker.PickRandom(topics);
@@ -109,12 +107,11 @@ public class SearchMemoryToolTests : DatabaseTest
     {
         // arrange
         var searchPhrase = _faker.Lorem.Word();
-        var memories = Enumerable
-            .Range(start: 0, count: 10)
-            .Select(_ => _faker.Lorem.Sentence() + searchPhrase)
-            .ToArray();
 
-        _ = CreateMemoriesTool.Handle(ConnectionString, _faker.Lorem.Word(), memories, _faker.Lorem.Sentence());
+        foreach (var m in _faker.Make(count: 3, () => _faker.Lorem.Sentence() + searchPhrase))
+        {
+            _ = CreateMemoryTool.Handle(ConnectionString, _faker.Lorem.Word(), m, _faker.Lorem.Sentence());
+        }
 
         // act
         var result = AppJsonSerializer.Deserialize<MemoryDto[]>(
@@ -131,10 +128,9 @@ public class SearchMemoryToolTests : DatabaseTest
         // arrange
         var content = _faker.Lorem.Word();
 
-        var memories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoriesTool.Handle(ConnectionString, _faker.Lorem.Sentence(), [content])
-        );
-        var expectedMemoryNodeId = memories[0].Id;
+        var expectedMemoryNodeId = AppJsonSerializer
+            .Deserialize<CreatedMemoryDto>(CreateMemoryTool.Handle(ConnectionString, _faker.Lorem.Sentence(), content))
+            .Id;
 
         // act
         var result = AppJsonSerializer.Deserialize<MemoryDto[]>(SearchMemoryTool.Handle(ConnectionString, [content]));

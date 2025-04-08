@@ -28,15 +28,14 @@ var faker = new Faker();
 var topics = faker.Make(10, () => faker.Lorem.Sentence());
 foreach (var topic in topics)
 {
-    var memories = faker.Make(10, () => faker.Lorem.Paragraph());
     Guid? lastMemoryNodeId = null;
-    foreach (var memory in memories)
+    foreach (var memory in faker.Make(10, () => faker.Lorem.Paragraph()))
     {
         var newMemories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoriesTool.Handle(
+            CreateMemoryTool.Handle(
                 connectionString,
                 topic,
-                [memory],
+                memory,
                 faker.Lorem.Paragraph().OrNull(faker),
                 lastMemoryNodeId
             )

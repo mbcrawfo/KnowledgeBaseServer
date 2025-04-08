@@ -1,6 +1,4 @@
-using System.Diagnostics;
 using System.Linq;
-using System.Text.Json;
 using Bogus;
 using KnowledgeBaseServer.Dtos;
 using KnowledgeBaseServer.Tests.Data;
@@ -14,8 +12,8 @@ public class GetMemoryByIdToolTests : DatabaseTest
 {
     private readonly Faker _faker = new();
     private readonly Faker<MemoryContext> _memoryContextFaker = MemoryContext.Faker();
-    private readonly Faker<MemoryNode> _memoryNodeFaker = MemoryNode.Faker();
     private readonly Faker<MemoryEdge> _memoryEdgeFaker = MemoryEdge.Faker();
+    private readonly Faker<MemoryNode> _memoryNodeFaker = MemoryNode.Faker();
     private readonly Faker<Topic> _topicFaker = Topic.Faker();
 
     [Fact]
@@ -108,11 +106,14 @@ public class GetMemoryByIdToolTests : DatabaseTest
     public void ShouldReturnMemory_WhenMemoriesDoNotHaveContext()
     {
         // arrange
-        var memories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoriesTool.Handle(ConnectionString, _faker.Lorem.Sentence(), _faker.Lorem.Words(4))
-        );
-
-        Debug.Assert(memories is { Length: 4 });
+        var memories = _faker
+            .Lorem.Words(4)
+            .Select(w =>
+                AppJsonSerializer.Deserialize<CreatedMemoryDto>(
+                    CreateMemoryTool.Handle(ConnectionString, _faker.Lorem.Sentence(), w)
+                )
+            )
+            .ToArray();
         var sourceMemoryNodeId = memories[0].Id;
         var targetMemoryNodeIds = memories.Skip(1).Select(m => m.Id).ToArray();
 
