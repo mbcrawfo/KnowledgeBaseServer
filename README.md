@@ -6,7 +6,7 @@ A [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) server that a
 
 ## Usage
 
-**IMPORTANT** - Due to a bug in the .Net MCP library, the server will hang on shutdown.  You will need to manually kill the docker container after closing Claude Desktop, and may have dangling dotnet processes if running locally.
+**IMPORTANT** - Due to a bug in the .Net MCP library, the server may hang on shutdown.  You will need to manually kill the docker container after closing Claude Desktop, and may have dangling dotnet processes if running locally.
 
 Two environment variables control the location and filename of the database.
 
@@ -16,7 +16,9 @@ Two environment variables control the location and filename of the database.
 
 ### Docker
 
-When using docker you must create a persistent volume to store the database (advanced users can mount a folder from their file system).  Run `docker volume create knowledgebase` to set it up, then configure the server in your `claude_desktop_config.json` as below.  Note that the `DATABASE_PATH` variable will be the path within the container, which defaults to `/db/knowledgebase.sqlite`.
+When using docker you must create a persistent volume to store the database (advanced users can mount a folder from their file system).  Run `docker volume create knowledgebase` to set it up, then configure the server in your `claude_desktop_config.json` as below.
+
+Note that when using docker the `DATABASE_PATH` variable will be the path within the container, which defaults to `/db/knowledgebase.sqlite`.
 
 ```json
 {
@@ -61,6 +63,10 @@ When running locally the default database location is in your Application Data d
 }
 
 ```
+
+## Prompts
+
+The server includes a "General Memory Usage" prompt to tell the LLM how to use memory.  However you may wish to use a custom prompt to be more specific to your usage.
 
 ## Development
 
