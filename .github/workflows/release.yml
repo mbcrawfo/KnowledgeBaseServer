@@ -1,12 +1,42 @@
-name: Publish Container Image
+name: Publish Release Version
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  release:
+    types: [published]
 
 jobs:
-  build:
+  build-release-artifacts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone the repo
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore NuGet packages
+        run: dotnet restore
+
+      - name: Publish
+        run: dotnet publish --no-restore --configuration Release --artifacts-path ./artifacts
+
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: ./artifacts/publish/**/*
+
+      - name: Upload release artifacts
+        if: github.event_name == 'release'
+        run: gh release upload ${{ github.event.release.tag_name }} ./artifacts/publish/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-container-image:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,7 +46,7 @@ jobs:
         with:
           images: |
             mbcrawfo/knowledge-base-server
-          tags: type=semver,pattern={{version}}
+          tags: type=ref,event=tag
 
       - name: Login to Docker Hub
         if: github.event_name != 'pull_request'
