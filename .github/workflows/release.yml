@@ -34,7 +34,7 @@ jobs:
         if: github.event_name == 'release'
         run: |
           zip -r ./artifacts/KnowledgeBaseServer.zip ./artifacts/publish/KnowledgeBaseServer/release
-          gh release upload ${{ github.event.release.tag_name }} ./artifacts/publish/KnowledgeBaseServer/release/**/*
+          gh release upload ${{ github.event.release.tag_name }} ./artifacts/KnowledgeBaseServer.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
