@@ -28,8 +28,9 @@ public static class Migrator
                 Directory.CreateDirectory(directory);
             }
 
+            // Validate that we can create or connect to the database.
             using var connection = ConnectionString.Create(path).CreateConnection();
-            connection.Execute("PRAGMA journal_mode=WAL;");
+            connection.Open();
             return true;
         }
         catch (Exception e)

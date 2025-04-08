@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text.Json;
 using System.Threading;
+using Dapper;
 using KnowledgeBaseServer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -56,6 +57,12 @@ var dbSetupSuccess =
 if (!dbSetupSuccess)
 {
     return 1;
+}
+
+// Use WAL mode for real app databases (initialized here so that it does not affect test databases).
+using (var connection = connectionString.CreateConnection())
+{
+    _ = connection.Execute("PRAGMA journal_mode=WAL;");
 }
 
 using var cancellationTokenSource = new CancellationTokenSource();

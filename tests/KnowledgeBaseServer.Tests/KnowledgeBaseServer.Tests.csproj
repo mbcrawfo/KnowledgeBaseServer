@@ -22,4 +22,10 @@
       <ProjectReference Include="..\..\src\KnowledgeBaseServer\KnowledgeBaseServer.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="DatabaseMigrationTests\databases\*.sqlite">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>
