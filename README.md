@@ -16,9 +16,9 @@ Two environment variables control the location and filename of the database.
 
 ### Docker
 
-When using docker you must create a persistent volume to store the database (advanced users can mount a folder from their file system).  Run `docker volume create knowledgebase` to set it up, then configure the server in your `claude_desktop_config.json` as below.
+When using docker you must create a persistent volume to store the database (advanced users can mount a folder from their file system, if desired).  Run `docker volume create knowledgebase` to set it up, then configure the server in your `claude_desktop_config.json` as below.
 
-Note that when using docker the `DATABASE_PATH` variable will be the path within the container, which defaults to `/db/knowledgebase.sqlite`.
+If you want to use a custom database file with docker you must use `DATABASE_PATH` and pass it to the docker command using the `--env` arg.  For example (place these strings in the `args` array of the config, before the image name), `"--env", "DATABASE_PATH=/db/my_db.sqlite"`.
 
 ```json
 {
