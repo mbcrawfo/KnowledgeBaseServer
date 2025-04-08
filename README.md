@@ -1,5 +1,6 @@
 # MCP KnowledgeBase Server
 
+[![Docker Image Version](https://img.shields.io/docker/v/mbcrawfo/knowledge-base-server?label=Docker%20Image&sort=semver)](https://hub.docker.com/r/mbcrawfo/knowledge-base-server)
 ![Build Status](https://github.com/mbcrawfo/KnowledgeBaseServer/actions/workflows/ci.yml/badge.svg?branch=main)
 
 A [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) server that allows LLMS to store memories during a conversation and search them later.  Memories are stored in a [SQLite](https://www.sqlite.org) database, and its full text search features power the memory search.
