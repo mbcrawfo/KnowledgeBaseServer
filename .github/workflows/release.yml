@@ -21,7 +21,7 @@ jobs:
         run: dotnet restore
 
       - name: Publish
-        run: dotnet publish --no-restore --configuration Release --artifacts-path ./artifacts
+        run: dotnet publish --configuration Release --artifacts-path ./artifacts
 
       - name: Upload build artifacts
         if: always()
