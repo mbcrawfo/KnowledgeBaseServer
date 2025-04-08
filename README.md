@@ -30,7 +30,7 @@ Note that when using docker the `DATABASE_PATH` variable will be the path within
         "--interactive",
         "--rm",
         "--volume", "knowledgebase:/db",
-        "knowledge-base-server"
+        "mbcrawfo/knowledge-base-server"
       ]
     }
   }
