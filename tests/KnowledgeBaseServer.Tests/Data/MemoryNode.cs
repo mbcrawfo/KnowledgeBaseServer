@@ -22,11 +22,14 @@ public sealed class MemoryNode
 
     public string? OutdatedReason { get; init; }
 
+    public required int Importance { get; init; }
+
     public static Faker<MemoryNode> Faker() =>
         new Faker<MemoryNode>()
             .RuleFor(x => x.Id, Guid.CreateVersion7)
             .RuleFor(x => x.Created, f => f.Date.PastOffset())
-            .RuleFor(x => x.Content, f => f.Lorem.Sentence());
+            .RuleFor(x => x.Content, f => f.Lorem.Sentence())
+            .RuleFor(x => x.Importance, f => f.Random.Int(min: 0, max: 100));
 }
 
 public static partial class FakerExtensions
@@ -47,13 +50,12 @@ public static partial class DbConnectionExtensions
 {
     public static void SeedMemoryNodes(this IDbConnection connection, IEnumerable<MemoryNode> memoryNodes)
     {
-        connection.Execute(
-            """
-            insert into memory_nodes (id, created, topic_id, context_id, content, outdated, outdated_reason)
-            values (@Id, @Created, @TopicId, @ContextId, @Content, @Outdated, @OutdatedReason)
-            """,
-            memoryNodes
-        );
+        const string sql = """
+            insert into memory_nodes (id, created, topic_id, context_id, content, outdated, outdated_reason, importance)
+            values (@Id, @Created, @TopicId, @ContextId, @Content, @Outdated, @OutdatedReason, @Importance)
+            """;
+
+        connection.Execute(sql, memoryNodes);
     }
 
     public static void SeedMemoryNode(this IDbConnection connection, MemoryNode memoryNode) =>
@@ -66,7 +68,7 @@ public static partial class DbConnectionExtensions
     )
     {
         var sql = """
-            select id, created, topic_id, context_id, content, outdated, outdated_reason
+            select id, created, topic_id, context_id, content, outdated, outdated_reason, importance
             from memory_nodes
             """;
         if (where is not null)

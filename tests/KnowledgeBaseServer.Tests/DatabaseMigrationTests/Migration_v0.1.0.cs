@@ -88,7 +88,8 @@ public class MigrationTests_V0_1_0 : MigrationTest
                     x => x.ContextId.ShouldBe(originalMemoryNode.ContextId),
                     x => x.Content.ShouldBe(originalMemoryNode.Content),
                     x => x.Outdated.ShouldBe(originalMemoryNode.Outdated),
-                    x => x.OutdatedReason.ShouldBe(originalMemoryNode.OutdatedReason)
+                    x => x.OutdatedReason.ShouldBe(originalMemoryNode.OutdatedReason),
+                    x => x.Importance.ShouldBe(50)
                 );
         }
 
