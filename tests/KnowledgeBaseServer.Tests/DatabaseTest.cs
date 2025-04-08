@@ -1,6 +1,6 @@
 using System;
+using System.Data;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace KnowledgeBaseServer.Tests;
@@ -14,11 +14,15 @@ public abstract class DatabaseTest : IDisposable
 {
     private static int _counter = 1;
 
-    private readonly string _fileName = $"testdb{_counter++}.sqlite";
+    // We must hold a connection open for the lifetime of the test, otherwise the in-memory database will be destroyed.
+    private readonly IDbConnection _connection;
+
+    private readonly string _fileName = $"testdb{_counter++}";
 
     protected DatabaseTest()
     {
-        ConnectionString = ConnectionString.Create(_fileName);
+        ConnectionString = new ConnectionString($"Data Source={_fileName};Mode=Memory;Cache=Shared;Foreign Keys=True;");
+        _connection = ConnectionString.CreateConnection();
 
         if (!Migrator.ApplyMigrations(new NullLoggerFactory(), ConnectionString))
         {
@@ -29,5 +33,5 @@ public abstract class DatabaseTest : IDisposable
     protected ConnectionString ConnectionString { get; }
 
     /// <inheritdoc />
-    public void Dispose() => File.Delete(_fileName);
+    public void Dispose() => _connection.Dispose();
 }

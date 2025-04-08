@@ -19,9 +19,8 @@ public sealed record ConnectionString(string Value)
     {
         var connection = new SqliteConnection(Value);
         connection.Open();
-        connection.Execute("PRAGMA foreign_keys = ON;");
         return connection;
     }
 
-    public static ConnectionString Create(string path) => new($"Data Source={path};");
+    public static ConnectionString Create(string path) => new($"Data Source={path};Foreign Keys=True;");
 }
