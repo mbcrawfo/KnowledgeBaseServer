@@ -1,6 +1,4 @@
-using System.Diagnostics;
 using System.Linq;
-using System.Text.Json;
 using Bogus;
 using Dapper;
 using KnowledgeBaseServer.Dtos;
@@ -26,13 +24,7 @@ public class CreateMemoriesToolTests : DatabaseTest
         var expectedContext = _faker.Lorem.Sentence();
 
         // act
-        _ = CreateMemoriesTool.Handle(
-            ConnectionString,
-            JsonSerializerOptions.Default,
-            expectedTopic,
-            [expectedMemory],
-            expectedContext
-        );
+        _ = CreateMemoriesTool.Handle(ConnectionString, expectedTopic, [expectedMemory], expectedContext);
 
         // assert
         using var connection = ConnectionString.CreateConnection();
@@ -55,13 +47,7 @@ public class CreateMemoriesToolTests : DatabaseTest
         var expectedContext = _faker.Lorem.Sentence();
 
         // act
-        _ = CreateMemoriesTool.Handle(
-            ConnectionString,
-            JsonSerializerOptions.Default,
-            expectedTopic.Name,
-            [expectedMemory],
-            expectedContext
-        );
+        _ = CreateMemoriesTool.Handle(ConnectionString, expectedTopic.Name, [expectedMemory], expectedContext);
 
         // assert
         using var connection = ConnectionString.CreateConnection();
@@ -78,8 +64,7 @@ public class CreateMemoriesToolTests : DatabaseTest
         var expectedMemory = _faker.Lorem.Sentence();
 
         // act
-
-        _ = CreateMemoriesTool.Handle(ConnectionString, JsonSerializerOptions.Default, topic, [expectedMemory]);
+        _ = CreateMemoriesTool.Handle(ConnectionString, topic, [expectedMemory]);
 
         // assert
         using var connection = ConnectionString.CreateConnection();
@@ -100,18 +85,12 @@ public class CreateMemoriesToolTests : DatabaseTest
         var searchWord = _faker.PickRandom(expectedMemory.Split(' ')).RemovePunctuation();
 
         // act
-        _ = CreateMemoriesTool.Handle(
-            ConnectionString,
-            JsonSerializerOptions.Default,
-            topic,
-            [expectedMemory],
-            expectedContext
-        );
+        _ = CreateMemoriesTool.Handle(ConnectionString, topic, [expectedMemory], expectedContext);
 
         using var connection = ConnectionString.CreateConnection();
         var memorySearches = connection
             .Query<MemorySearch>(
-                """
+                sql: """
                 select memory_node_id, memory_content, memory_context
                 from memory_search
                 where memory_content match @Word
@@ -122,7 +101,6 @@ public class CreateMemoriesToolTests : DatabaseTest
 
         // assert
         memorySearches
-            .ShouldNotBeNull()
             .ShouldHaveSingleItem()
             .ShouldSatisfyAllConditions(
                 () => memorySearches[0].MemoryContent.ShouldBe(expectedMemory),
@@ -138,7 +116,6 @@ public class CreateMemoriesToolTests : DatabaseTest
         // act
         var result = CreateMemoriesTool.Handle(
             ConnectionString,
-            JsonSerializerOptions.Default,
             _faker.Lorem.Sentence(),
             [_faker.Lorem.Sentence()],
             sourceMemoryNodeId: _faker.Random.Guid()
@@ -157,22 +134,15 @@ public class CreateMemoriesToolTests : DatabaseTest
     public void ShouldLinkNewMemories_WhenParentMemoryIdProvided()
     {
         // arrange
-        var sourceMemories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoriesTool.Handle(
-                ConnectionString,
-                JsonSerializerOptions.Default,
-                _faker.Lorem.Sentence(),
-                [_faker.Lorem.Sentence()]
-            )
+        var sourceMemories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
+            CreateMemoriesTool.Handle(ConnectionString, _faker.Lorem.Sentence(), [_faker.Lorem.Sentence()])
         );
-        Debug.Assert(sourceMemories is { Length: 1 });
         var sourceMemoryNodeId = sourceMemories[0].Id;
 
         // act
-        var targetMemories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
+        var targetMemories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
             CreateMemoriesTool.Handle(
                 ConnectionString,
-                JsonSerializerOptions.Default,
                 _faker.Lorem.Sentence(),
                 [_faker.Lorem.Sentence()],
                 sourceMemoryNodeId: sourceMemoryNodeId
@@ -201,8 +171,8 @@ public class CreateMemoriesToolTests : DatabaseTest
         var context = _faker.Lorem.Sentence();
 
         // act
-        var actualMemories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoriesTool.Handle(ConnectionString, JsonSerializerOptions.Default, topic.Name, [memories], context)
+        var actualMemories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
+            CreateMemoriesTool.Handle(ConnectionString, topic.Name, [memories], context)
         );
 
         using var connection = ConnectionString.CreateConnection();

@@ -1,6 +1,4 @@
-using System.Diagnostics;
 using System.Linq;
-using System.Text.Json;
 using Bogus;
 using KnowledgeBaseServer.Dtos;
 using KnowledgeBaseServer.Tools;
@@ -20,7 +18,7 @@ public class SearchMemoryToolTests : DatabaseTest
         var phrases = _faker.Lorem.Words(10);
 
         // act
-        var result = SearchMemoryTool.Handle(ConnectionString, JsonSerializerOptions.Default, phrases);
+        var result = SearchMemoryTool.Handle(ConnectionString, phrases);
 
         // assert
         result.ShouldStartWith("Error: Too many phrases");
@@ -34,7 +32,7 @@ public class SearchMemoryToolTests : DatabaseTest
         var topics = _faker.Lorem.Words(10);
 
         // act
-        var result = SearchMemoryTool.Handle(ConnectionString, JsonSerializerOptions.Default, phrases, topics);
+        var result = SearchMemoryTool.Handle(ConnectionString, phrases, topics);
 
         // assert
         result.ShouldStartWith("Error: Too many topics");
@@ -48,13 +46,7 @@ public class SearchMemoryToolTests : DatabaseTest
         var topics = _faker.Lorem.Words(1);
 
         // act
-        var result = SearchMemoryTool.Handle(
-            ConnectionString,
-            JsonSerializerOptions.Default,
-            phrases,
-            topics,
-            maxResults: 100
-        );
+        var result = SearchMemoryTool.Handle(ConnectionString, phrases, topics, maxResults: 100);
 
         // assert
         result.ShouldStartWith("Error: maxResults is too large");
@@ -69,21 +61,20 @@ public class SearchMemoryToolTests : DatabaseTest
         var context = _faker.Lorem.Sentence();
         var searchPhrase = _faker.PickRandom(content.Split(' '));
 
-        var memories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoriesTool.Handle(ConnectionString, JsonSerializerOptions.Default, topic, [content], context)
+        var memories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
+            CreateMemoriesTool.Handle(ConnectionString, topic, [content], context)
         );
-        Debug.Assert(memories is { Length: 1 });
-        var expected = JsonSerializer.Deserialize<MemoryDto>(
-            GetMemoryByIdTool.Handle(ConnectionString, JsonSerializerOptions.Default, memories[0].Id)
+        var expected = AppJsonSerializer.Deserialize<MemoryDto>(
+            GetMemoryByIdTool.Handle(ConnectionString, memories[0].Id)
         );
 
         // act
-        var actual = JsonSerializer.Deserialize<MemoryDto[]>(
-            SearchMemoryTool.Handle(ConnectionString, JsonSerializerOptions.Default, [searchPhrase])
+        var actual = AppJsonSerializer.Deserialize<MemoryDto[]>(
+            SearchMemoryTool.Handle(ConnectionString, [searchPhrase])
         );
 
         // assert
-        actual.ShouldNotBeNull().ShouldHaveSingleItem().ShouldBeEquivalentTo(expected);
+        actual.ShouldHaveSingleItem().ShouldBeEquivalentTo(expected);
     }
 
     [Fact]
@@ -99,24 +90,18 @@ public class SearchMemoryToolTests : DatabaseTest
                 .Range(start: 0, count: 3)
                 .Select(_ => _faker.Lorem.Sentence() + searchPhrase)
                 .ToArray();
-            _ = CreateMemoriesTool.Handle(
-                ConnectionString,
-                JsonSerializerOptions.Default,
-                topic,
-                memories,
-                _faker.Lorem.Sentence()
-            );
+            _ = CreateMemoriesTool.Handle(ConnectionString, topic, memories, _faker.Lorem.Sentence());
         }
 
         var expectedTopic = _faker.PickRandom(topics);
 
         // act
-        var result = JsonSerializer.Deserialize<MemoryDto[]>(
-            SearchMemoryTool.Handle(ConnectionString, JsonSerializerOptions.Default, [searchPhrase], [expectedTopic])
+        var result = AppJsonSerializer.Deserialize<MemoryDto[]>(
+            SearchMemoryTool.Handle(ConnectionString, [searchPhrase], [expectedTopic])
         );
 
         // assert
-        result.ShouldNotBeNull().ShouldAllBe(m => m.Topic == expectedTopic);
+        result.ShouldAllBe(m => m.Topic == expectedTopic);
     }
 
     [Fact]
@@ -129,21 +114,15 @@ public class SearchMemoryToolTests : DatabaseTest
             .Select(_ => _faker.Lorem.Sentence() + searchPhrase)
             .ToArray();
 
-        _ = CreateMemoriesTool.Handle(
-            ConnectionString,
-            JsonSerializerOptions.Default,
-            _faker.Lorem.Word(),
-            memories,
-            _faker.Lorem.Sentence()
-        );
+        _ = CreateMemoriesTool.Handle(ConnectionString, _faker.Lorem.Word(), memories, _faker.Lorem.Sentence());
 
         // act
-        var result = JsonSerializer.Deserialize<MemoryDto[]>(
-            SearchMemoryTool.Handle(ConnectionString, JsonSerializerOptions.Default, [searchPhrase], maxResults: 2)
+        var result = AppJsonSerializer.Deserialize<MemoryDto[]>(
+            SearchMemoryTool.Handle(ConnectionString, [searchPhrase], maxResults: 2)
         );
 
         // assert
-        result.ShouldNotBeNull().Length.ShouldBe(2);
+        result.Length.ShouldBe(2);
     }
 
     [Fact]
@@ -152,24 +131,15 @@ public class SearchMemoryToolTests : DatabaseTest
         // arrange
         var content = _faker.Lorem.Word();
 
-        var memories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoriesTool.Handle(
-                ConnectionString,
-                JsonSerializerOptions.Default,
-                _faker.Lorem.Sentence(),
-                [content]
-            )
+        var memories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
+            CreateMemoriesTool.Handle(ConnectionString, _faker.Lorem.Sentence(), [content])
         );
-
-        Debug.Assert(memories is { Length: 1 });
         var expectedMemoryNodeId = memories[0].Id;
 
         // act
-        var result = JsonSerializer.Deserialize<MemoryDto[]>(
-            SearchMemoryTool.Handle(ConnectionString, JsonSerializerOptions.Default, [content])
-        );
+        var result = AppJsonSerializer.Deserialize<MemoryDto[]>(SearchMemoryTool.Handle(ConnectionString, [content]));
 
         // assert
-        result.ShouldNotBeNull().ShouldHaveSingleItem().Id.ShouldBe(expectedMemoryNodeId);
+        result.ShouldHaveSingleItem().Id.ShouldBe(expectedMemoryNodeId);
     }
 }

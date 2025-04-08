@@ -1,6 +1,4 @@
-using System.Diagnostics;
 using System.Linq;
-using System.Text.Json;
 using Bogus;
 using KnowledgeBaseServer.Dtos;
 using KnowledgeBaseServer.Tests.Data;
@@ -30,16 +28,9 @@ public class MarkMemoryAsOutdatedToolTests : DatabaseTest
     public void ShouldUpdateMemoryNode()
     {
         // arrange
-        var memories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoriesTool.Handle(
-                ConnectionString,
-                JsonSerializerOptions.Default,
-                _faker.Lorem.Sentence(),
-                [_faker.Lorem.Sentence()]
-            )
+        var memories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
+            CreateMemoriesTool.Handle(ConnectionString, _faker.Lorem.Sentence(), [_faker.Lorem.Sentence()])
         );
-
-        Debug.Assert(memories is { Length: 1 });
         var memoryNodeId = memories[0].Id;
         var expectedReason = _faker.Lorem.Sentence();
 
@@ -58,16 +49,9 @@ public class MarkMemoryAsOutdatedToolTests : DatabaseTest
     public void ShouldNotModifyMemoryNode_WhenNodeIsAlreadyOutdated()
     {
         // arrange
-        var memories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoriesTool.Handle(
-                ConnectionString,
-                JsonSerializerOptions.Default,
-                _faker.Lorem.Sentence(),
-                [_faker.Lorem.Sentence()]
-            )
+        var memories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
+            CreateMemoriesTool.Handle(ConnectionString, _faker.Lorem.Sentence(), [_faker.Lorem.Sentence()])
         );
-
-        Debug.Assert(memories is { Length: 1 });
         var memoryNodeId = memories[0].Id;
 
         _ = MarkMemoryAsOutdatedTool.Handle(ConnectionString, memoryNodeId, _faker.Lorem.Sentence());
@@ -76,8 +60,6 @@ public class MarkMemoryAsOutdatedToolTests : DatabaseTest
         {
             expectedMemoryNode = arrangeConnection.GetMemoryNodes().Single();
         }
-
-        Debug.Assert(expectedMemoryNode is not null);
 
         // act
         var result = MarkMemoryAsOutdatedTool.Handle(ConnectionString, memoryNodeId, _faker.Lorem.Sentence());

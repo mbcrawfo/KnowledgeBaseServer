@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Text.Json;
 using Bogus;
 using KnowledgeBaseServer.Dtos;
 using KnowledgeBaseServer.Tests.Data;
@@ -31,16 +29,9 @@ public class ConnectMemoriesToolTests : DatabaseTest
     public void ShouldDoNothing_WhenEdgeExists()
     {
         // arrange
-        var memories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoriesTool.Handle(
-                ConnectionString,
-                JsonSerializerOptions.Default,
-                _faker.Lorem.Word(),
-                _faker.Lorem.Words(2)
-            )
+        var memories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
+            CreateMemoriesTool.Handle(ConnectionString, _faker.Lorem.Word(), _faker.Lorem.Words(2))
         );
-
-        Debug.Assert(memories is { Length: 2 });
         var sourceMemoryNodeId = memories[0].Id;
         var targetMemoryNodeId = memories[1].Id;
 
@@ -69,16 +60,9 @@ public class ConnectMemoriesToolTests : DatabaseTest
     public void ShouldCreateEdge()
     {
         // arrange
-        var memories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoriesTool.Handle(
-                ConnectionString,
-                JsonSerializerOptions.Default,
-                _faker.Lorem.Word(),
-                _faker.Lorem.Words()
-            )
+        var memories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
+            CreateMemoriesTool.Handle(ConnectionString, _faker.Lorem.Word(), _faker.Lorem.Words())
         );
-
-        Debug.Assert(memories is { Length: 3 });
         var sourceMemoryNodeId = memories[0].Id;
         var targetMemoryNodeId1 = memories[1].Id;
         var targetMemoryNodeId2 = memories[2].Id;

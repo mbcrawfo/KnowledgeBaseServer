@@ -25,9 +25,7 @@ public class GetTopicsToolTests : DatabaseTest
         var expected = topics.Select(t => t.Name).Order().ToArray();
 
         // act
-        var actual = JsonSerializer.Deserialize<string[]>(
-            GetTopicsTool.Handle(ConnectionString, JsonSerializerOptions.Default)
-        );
+        var actual = AppJsonSerializer.Deserialize<string[]>(GetTopicsTool.Handle(ConnectionString));
 
         // assert
         actual.ShouldBe(expected);

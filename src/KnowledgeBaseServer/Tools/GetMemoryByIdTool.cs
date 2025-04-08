@@ -14,7 +14,6 @@ public static class GetMemoryByIdTool
     [Description("Retrieves a single memory from the knowledge base.")]
     public static string Handle(
         ConnectionString connectionString,
-        JsonSerializerOptions jsonSerializerOptions,
         [Description("Id of the memory node to retrieve.")] Guid memoryNodeId,
         [Description("When true, include memory nodes linked to the requested memory.")]
             bool includeLinkedMemories = false
@@ -40,7 +39,7 @@ public static class GetMemoryByIdTool
 
         if (!includeLinkedMemories)
         {
-            return JsonSerializer.Serialize(memory, jsonSerializerOptions);
+            return AppJsonSerializer.Serialize(memory);
         }
 
         var linkedMemories = connection.Query<MemoryDto>(
@@ -66,6 +65,6 @@ public static class GetMemoryByIdTool
             memory.OutdatedReason,
             linkedMemories.AsList()
         );
-        return JsonSerializer.Serialize(response, jsonSerializerOptions);
+        return AppJsonSerializer.Serialize(response);
     }
 }

@@ -44,7 +44,6 @@ builder.Logging.AddConsole(options => options.LogToStandardErrorThreshold = LogL
 
 builder.Services.AddMcpServer().WithStdioServerTransport().WithPromptsFromAssembly().WithToolsFromAssembly();
 builder.Services.AddSingleton(connectionString);
-builder.Services.AddSingleton(new JsonSerializerOptions(JsonSerializerDefaults.Web) { WriteIndented = true });
 
 var app = builder.Build();
 

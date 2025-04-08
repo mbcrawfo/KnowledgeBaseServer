@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Text.Json;
 using Dapper;
 using ModelContextProtocol.Server;
 
@@ -10,7 +9,7 @@ public static class GetTopicsTool
 {
     [McpServerTool(Name = "GetTopics", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false)]
     [Description("Lists all topics in the knowledge base.")]
-    public static string Handle(ConnectionString connectionString, JsonSerializerOptions jsonSerializerOptions)
+    public static string Handle(ConnectionString connectionString)
     {
         using var connection = connectionString.CreateConnection();
 
@@ -24,6 +23,6 @@ public static class GetTopicsTool
             )
             .AsList();
 
-        return JsonSerializer.Serialize(topics, jsonSerializerOptions);
+        return AppJsonSerializer.Serialize(topics);
     }
 }

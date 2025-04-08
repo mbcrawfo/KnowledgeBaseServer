@@ -44,17 +44,12 @@ public class GetMemoryByIdToolTests : DatabaseTest
         );
 
         // act
-        var actual = JsonSerializer.Deserialize<MemoryDto>(
-            GetMemoryByIdTool.Handle(
-                ConnectionString,
-                JsonSerializerOptions.Default,
-                memory.Id,
-                includeLinkedMemories: false
-            )
+        var actual = AppJsonSerializer.Deserialize<MemoryDto>(
+            GetMemoryByIdTool.Handle(ConnectionString, memory.Id, includeLinkedMemories: false)
         );
 
         // assert
-        actual.ShouldNotBeNull().ShouldBeEquivalentTo(expected);
+        actual.ShouldBeEquivalentTo(expected);
     }
 
     [Fact]
@@ -101,30 +96,20 @@ public class GetMemoryByIdToolTests : DatabaseTest
         );
 
         // act
-        var actual = JsonSerializer.Deserialize<MemoryWithRelationsDto>(
-            GetMemoryByIdTool.Handle(
-                ConnectionString,
-                JsonSerializerOptions.Default,
-                memory.Id,
-                includeLinkedMemories: true
-            )
+        var actual = AppJsonSerializer.Deserialize<MemoryWithRelationsDto>(
+            GetMemoryByIdTool.Handle(ConnectionString, memory.Id, includeLinkedMemories: true)
         );
 
         // assert
-        actual.ShouldNotBeNull().ShouldBeEquivalentTo(expected);
+        actual.ShouldBeEquivalentTo(expected);
     }
 
     [Fact]
     public void ShouldReturnMemory_WhenMemoriesDoNotHaveContext()
     {
         // arrange
-        var memories = JsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoriesTool.Handle(
-                ConnectionString,
-                JsonSerializerOptions.Default,
-                _faker.Lorem.Sentence(),
-                _faker.Lorem.Words(4)
-            )
+        var memories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
+            CreateMemoriesTool.Handle(ConnectionString, _faker.Lorem.Sentence(), _faker.Lorem.Words(4))
         );
 
         Debug.Assert(memories is { Length: 4 });
@@ -134,21 +119,14 @@ public class GetMemoryByIdToolTests : DatabaseTest
         _ = ConnectMemoriesTool.Handle(ConnectionString, sourceMemoryNodeId, targetMemoryNodeIds);
 
         // act
-        var result = JsonSerializer.Deserialize<MemoryWithRelationsDto>(
-            GetMemoryByIdTool.Handle(
-                ConnectionString,
-                JsonSerializerOptions.Default,
-                sourceMemoryNodeId,
-                includeLinkedMemories: true
-            )
+        var result = AppJsonSerializer.Deserialize<MemoryWithRelationsDto>(
+            GetMemoryByIdTool.Handle(ConnectionString, sourceMemoryNodeId, includeLinkedMemories: true)
         );
 
         // assert
-        result
-            .ShouldNotBeNull()
-            .ShouldSatisfyAllConditions(
-                () => result.Id.ShouldBe(sourceMemoryNodeId),
-                () => result.LinkedMemories.Select(m => m.Id).ShouldBe(targetMemoryNodeIds, ignoreOrder: true)
-            );
+        result.ShouldSatisfyAllConditions(
+            () => result.Id.ShouldBe(sourceMemoryNodeId),
+            () => result.LinkedMemories.Select(m => m.Id).ShouldBe(targetMemoryNodeIds, ignoreOrder: true)
+        );
     }
 }

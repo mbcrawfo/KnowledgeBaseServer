@@ -1,7 +1,6 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
-using System.Text.Json;
 using Dapper;
 using KnowledgeBaseServer.Dtos;
 using KnowledgeBaseServer.Extensions;
@@ -23,7 +22,6 @@ public static class CreateMemoriesTool
     [Description("Create new memories in the knowledge base.")]
     public static string Handle(
         ConnectionString connectionString,
-        JsonSerializerOptions jsonSerializerOptions,
         [Description("The topic to use for the memories.")] string topic,
         [Description("The text of the memories.")] string[] memories,
         [Description("Optional information to provide context for these memories.")] string? context = null,
@@ -45,7 +43,7 @@ public static class CreateMemoriesTool
         if (topicId == Guid.Empty)
         {
             topicId = Guid.CreateVersion7();
-            connection.Execute(
+            _ = connection.Execute(
                 sql: """
                 insert into topics (id, created, name) values
                 (@Id, @Created, @Name)
@@ -64,7 +62,7 @@ public static class CreateMemoriesTool
         if (!string.IsNullOrEmpty(context))
         {
             contextId = Guid.CreateVersion7();
-            connection.Execute(
+            _ = connection.Execute(
                 sql: """
                 insert into memory_contexts (id, created, value) values
                 (@Id, @Created, @Value)
@@ -89,7 +87,7 @@ public static class CreateMemoriesTool
                 Content = m,
             })
             .ToArray();
-        connection.Execute(
+        _ = connection.Execute(
             sql: """
             insert into memory_nodes (id, created, topic_id, context_id, content) values
             (@Id, @Created, @TopicId, @ContextId, @Content)
@@ -98,7 +96,7 @@ public static class CreateMemoriesTool
             transaction
         );
 
-        connection.Execute(
+        _ = connection.Execute(
             sql: """
             insert into memory_search (memory_node_id, memory_content, memory_context) values
             (@MemoryId, @Content, @Context)
@@ -131,9 +129,6 @@ public static class CreateMemoriesTool
 
         transaction.Commit();
 
-        return JsonSerializer.Serialize(
-            createdNodes.Select(m => new CreatedMemoryDto(m.Id, m.Content)).ToArray(),
-            jsonSerializerOptions
-        );
+        return AppJsonSerializer.Serialize(createdNodes.Select(m => new CreatedMemoryDto(m.Id, m.Content)).ToArray());
     }
 }

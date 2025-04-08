@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
 using Dapper;
 using KnowledgeBaseServer.Dtos;
 using KnowledgeBaseServer.Extensions;
@@ -20,7 +19,6 @@ public static class SearchMemoryTool
     [Description("Performs a search for memories in the knowledge base.")]
     public static string Handle(
         ConnectionString connectionString,
-        JsonSerializerOptions jsonSerializerOptions,
         [Description("Phrases to search for. Maximum length: 5")] string[] phrases,
         [Description("Optionally limits the search to certain topics. Maximum length: 5")] string[]? topics = null,
         [Description("The maximum number of memories to return. Default: 5, Maximum value: 50")] int maxResults = 5
@@ -81,6 +79,6 @@ public static class SearchMemoryTool
             )
             .AsList();
 
-        return JsonSerializer.Serialize(memories, jsonSerializerOptions);
+        return AppJsonSerializer.Serialize(memories);
     }
 }
