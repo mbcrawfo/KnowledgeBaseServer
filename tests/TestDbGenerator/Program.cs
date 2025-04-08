@@ -29,18 +29,18 @@ foreach (var topic in topics)
     Guid? lastMemoryNodeId = null;
     foreach (var memory in faker.Make(count: 10, () => faker.Lorem.Paragraph()))
     {
-        var newMemories = AppJsonSerializer.Deserialize<CreatedMemoryDto[]>(
-            CreateMemoryTool.Handle(
-                connectionString,
-                topic,
-                memory,
-                faker.Random.Number(min: 0, max: 100),
-                faker.Lorem.Paragraph().OrNull(faker),
-                lastMemoryNodeId
+        lastMemoryNodeId = AppJsonSerializer
+            .Deserialize<CreatedMemoryDto>(
+                CreateMemoryTool.Handle(
+                    connectionString,
+                    topic,
+                    memory,
+                    faker.Random.Number(min: 0, max: 100),
+                    faker.Lorem.Paragraph().OrNull(faker),
+                    lastMemoryNodeId
+                )
             )
-        );
-
-        lastMemoryNodeId = newMemories[0].Id;
+            .Id;
     }
 }
 
