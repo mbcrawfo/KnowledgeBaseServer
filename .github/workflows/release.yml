@@ -32,7 +32,9 @@ jobs:
 
       - name: Upload release artifacts
         if: github.event_name == 'release'
-        run: gh release upload ${{ github.event.release.tag_name }} ./artifacts/publish/**/*
+        run: |
+          zip -r ./artifacts/KnowledgeBaseServer.zip ./artifacts/publish/KnowledgeBaseServer/release
+          gh release upload ${{ github.event.release.tag_name }} ./artifacts/publish/KnowledgeBaseServer/release/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -44,8 +46,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: |
-            mbcrawfo/knowledge-base-server
+          images: mbcrawfo/knowledge-base-server
           tags: type=ref,event=tag
 
       - name: Login to Docker Hub
