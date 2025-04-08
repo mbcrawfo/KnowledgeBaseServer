@@ -17,16 +17,16 @@ public abstract class DatabaseTest : IDisposable
     // We must hold a connection open for the lifetime of the test, otherwise the in-memory database will be destroyed.
     private readonly IDbConnection _connection;
 
-    private readonly string _fileName = $"testdb{_counter++}";
-
     protected DatabaseTest()
     {
-        ConnectionString = new ConnectionString($"Data Source={_fileName};Mode=Memory;Cache=Shared;Foreign Keys=True;");
+        ConnectionString = new ConnectionString(
+            $"Data Source=testdb{_counter++};Mode=Memory;Cache=Shared;Foreign Keys=True;"
+        );
         _connection = ConnectionString.CreateConnection();
 
         if (!Migrator.ApplyMigrations(new NullLoggerFactory(), ConnectionString))
         {
-            throw new InvalidOperationException("Failed to apply migrations");
+            throw new InvalidOperationException("Failed to apply migrations to test database.");
         }
     }
 
