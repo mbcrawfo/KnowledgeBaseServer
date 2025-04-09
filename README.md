@@ -7,8 +7,6 @@ A [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) server that a
 
 ## Usage
 
-**IMPORTANT** - Due to a bug in the .Net MCP library, the server may hang on shutdown.  You will need to manually kill the docker container after closing Claude Desktop, and may have dangling dotnet processes if running locally.
-
 Two environment variables control the location and filename of the database.
 
 `DATABASE_NAME`: Use the default location, but a custom db filename.  For example, `my_custom_db.sqlite`.
