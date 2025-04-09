@@ -14,6 +14,8 @@ public static class SearchMemoryTool
     private const int MaxPhrases = 5;
     private const int MaxTopics = 5;
     private const int MaxMaxResults = 50;
+    private const double RankWeight = 0.6;
+    private const double ImportanceWeight = 0.4;
 
     [McpServerTool(Name = "SearchMemory", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false)]
     [Description("Performs a search for memories in the knowledge base.")]
@@ -63,7 +65,9 @@ public static class SearchMemoryTool
             sb.AppendLine().AppendLine("where t.name in @Topics");
         }
 
-        sb.AppendLine().AppendLine("order by sr.rank").AppendLine("limit @MaxResults");
+        sb.AppendLine()
+            .AppendLine("order by (sr.rank * @RankWeight) + (mn.importance * @ImportanceWeight) desc")
+            .AppendLine("limit @MaxResults");
 
         using var connection = connectionString.CreateConnection();
 
@@ -75,6 +79,8 @@ public static class SearchMemoryTool
                     Phrases = phrasesParam,
                     Topics = topics,
                     MaxResults = maxResults,
+                    RankWeight,
+                    ImportanceWeight,
                 }
             )
             .AsList();
