@@ -2,7 +2,7 @@
 
 1.  Create the db using the TestDbGenerator app.  From the project root run:
     ```bash
-    dotnet run --project src/TestDbGenerator/TestDbGenerator.csproj tests/KnowledgeBaseServer.Tests/DatabaseMigrationTests/databases/v{version}.sqlite
+    dotnet run --project tests/TestDbGenerator/TestDbGenerator.csproj tests/KnowledgeBaseServer.Tests/DatabaseMigrationTests/databases/v{version}.sqlite
     ```
 2. Add a new test class in this folder that subclasses `MigrationTest`.
 3. Define nested records/classes that represent the tables in the database, in its form for the release that was just created.
