@@ -1,6 +1,9 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /build
 
+# See https://github.com/NuGet/Home/issues/13062
+ENV DOTNET_NUGET_SIGNATURE_VERIFICATION=false
+
 COPY global.json .
 COPY Directory.Build.props .
 COPY Directory.Packages.props .
