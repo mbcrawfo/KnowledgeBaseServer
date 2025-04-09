@@ -16,7 +16,7 @@ public class CreateMemoryToolTests : DatabaseTest
 
     [Theory]
     [InlineData(-1)]
-    [InlineData(101)]
+    [InlineData(2)]
     public void ShouldReturnError_WhenImportanceIsOutOfRange(int importance)
     {
         // arrange
@@ -30,7 +30,7 @@ public class CreateMemoryToolTests : DatabaseTest
         );
 
         // assert
-        result.ShouldBe("importance must be between 0 and 100.");
+        result.ShouldBe("importance must be between 0 and 1.");
     }
 
     [Fact]

@@ -24,7 +24,7 @@ public static class CreateMemoryTool
     {
         if (importance is < 0 or > 1)
         {
-            return $"{nameof(importance)} must be between 0 and 100.";
+            return $"{nameof(importance)} must be between 0 and 1.";
         }
 
         var now = DateTimeOffset.UtcNow;
