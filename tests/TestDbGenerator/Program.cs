@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Bogus;
 using KnowledgeBaseServer;
 using KnowledgeBaseServer.Dtos;
@@ -21,6 +22,7 @@ if (!dbSetupSuccess)
     return 1;
 }
 
+var logger = loggerFactory.CreateLogger(Assembly.GetExecutingAssembly().GetName().Name!);
 var faker = new Faker();
 
 var topics = faker.Make(count: 10, () => faker.Lorem.Sentence());
@@ -29,18 +31,22 @@ foreach (var topic in topics)
     Guid? lastMemoryNodeId = null;
     foreach (var memory in faker.Make(count: 10, () => faker.Lorem.Paragraph()))
     {
-        lastMemoryNodeId = AppJsonSerializer
-            .Deserialize<CreatedMemoryDto>(
-                CreateMemoryTool.Handle(
-                    connectionString,
-                    topic,
-                    memory,
-                    faker.Random.Number(min: 0, max: 100),
-                    faker.Lorem.Paragraph().OrNull(faker),
-                    lastMemoryNodeId
-                )
-            )
-            .Id;
+        var result = CreateMemoryTool.Handle(
+            connectionString,
+            topic,
+            memory,
+            faker.Random.Number(min: 0, max: 1),
+            faker.Lorem.Paragraph().OrNull(faker),
+            lastMemoryNodeId
+        );
+
+        if (!result.StartsWith('{'))
+        {
+            logger.LogError("Failed to create memory: {Result}", result);
+            return 1;
+        }
+
+        lastMemoryNodeId = AppJsonSerializer.Deserialize<CreatedMemoryDto>(result).Id;
     }
 }
 

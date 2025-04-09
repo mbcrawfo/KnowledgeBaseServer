@@ -49,6 +49,12 @@ public class MigrationTests_V0_1_0 : MigrationTest
         // assert
         result.ShouldBeTrue();
 
+        originalTopics.ShouldNotBeEmpty();
+        originalMemoryContexts.ShouldNotBeEmpty();
+        originalMemoryNodes.ShouldNotBeEmpty();
+        originalMemoryEdges.ShouldNotBeEmpty();
+        originalMemorySearches.ShouldNotBeEmpty();
+
         // Validate that the data migrated correctly.
         using var connection = ConnectionString.CreateConnection();
 
