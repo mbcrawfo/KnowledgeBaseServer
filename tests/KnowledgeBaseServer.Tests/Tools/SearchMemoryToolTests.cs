@@ -185,20 +185,26 @@ public class SearchMemoryToolTests : DatabaseTest
 
         // Create memory with high relevance (exact phrase match) but low importance
         var highRelevanceLowImportanceId = AppJsonSerializer
-            .Deserialize<CreatedMemoryDto>(CreateMemoryTool.Handle(
-                ConnectionString,
-                topic,
-                $"This is specifically about {searchPhrase} and nothing else",
-                importance: 0.1))
+            .Deserialize<CreatedMemoryDto>(
+                CreateMemoryTool.Handle(
+                    ConnectionString,
+                    topic,
+                    $"This is specifically about {searchPhrase} and nothing else",
+                    importance: 0.1
+                )
+            )
             .Id;
 
         // Create memory with moderate relevance but high importance
         var moderateRelevanceHighImportanceId = AppJsonSerializer
-            .Deserialize<CreatedMemoryDto>(CreateMemoryTool.Handle(
-                ConnectionString,
-                topic,
-                $"This mentions {searchPhrase} among other things like sorting and ordering",
-                importance: 0.9))
+            .Deserialize<CreatedMemoryDto>(
+                CreateMemoryTool.Handle(
+                    ConnectionString,
+                    topic,
+                    $"This mentions {searchPhrase} among other things like sorting and ordering",
+                    importance: 0.9
+                )
+            )
             .Id;
 
         // act
