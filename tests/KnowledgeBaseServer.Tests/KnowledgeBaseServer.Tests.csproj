@@ -1,15 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="Bogus" />
         <PackageReference Include="coverlet.collector" />
         <PackageReference Include="GitHubActionsTestLogger">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
         <PackageReference Include="Shouldly" />
@@ -17,15 +15,12 @@
         <PackageReference Include="xunit.analyzers" />
         <PackageReference Include="xunit.runner.visualstudio" />
     </ItemGroup>
-
     <ItemGroup>
-      <ProjectReference Include="..\..\src\KnowledgeBaseServer\KnowledgeBaseServer.csproj" />
+        <ProjectReference Include="..\..\src\KnowledgeBaseServer\KnowledgeBaseServer.csproj" />
     </ItemGroup>
-
     <ItemGroup>
-      <None Update="DatabaseMigrationTests\databases\*.sqlite">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
+        <None Update="DatabaseMigrationTests\databases\*.sqlite">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
-
 </Project>

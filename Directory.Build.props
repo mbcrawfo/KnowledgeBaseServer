@@ -5,26 +5,22 @@
         <ImplicitUsings>disable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-
         <!--
-            S6966 "Use async method on database connection": SQLite does not support async I/O.
-                See https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/async
-        -->
+                    S6966 "Use async method on database connection": SQLite does not support async I/O.
+                        See https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/async
+                -->
         <NoWarn>$(NoWarn);S6966</NoWarn>
-
         <!--
-            CS0618: "Type or member is obsolete": Just because something is obsolete doesn't mean we can stop using it
-                immediately.
-            NU190x: "NuGet audit warnings": Need to know about them, but they should not block the build.
-            S125: "Code should not be commented out": Makes it very annoying to test and develop iteratively.
-        -->
+                    CS0618: "Type or member is obsolete": Just because something is obsolete doesn't mean we can stop using it
+                        immediately.
+                    NU190x: "NuGet audit warnings": Need to know about them, but they should not block the build.
+                    S125: "Code should not be commented out": Makes it very annoying to test and develop iteratively.
+                -->
         <WarningsNotAsErrors>$(WarningsNotAsErrors);CS0618;NU1901;NU1092;NU1903;NU1904;S125</WarningsNotAsErrors>
-
         <Copyright>Copyright © $([System.DateTime]::Now.ToString('yyyy')) Michael Crawford</Copyright>
-        <AssemblyVersion>0.3.0.0</AssemblyVersion>
-        <InformationalVersion>0.3.0.0</InformationalVersion>
+        <AssemblyVersion>0.3.1.0</AssemblyVersion>
+        <InformationalVersion>0.3.1.0</InformationalVersion>
     </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="JetBrains.Annotations" />
         <PackageReference Include="Roslynator.Analyzers">

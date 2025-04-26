@@ -5,6 +5,7 @@ root = true
 indent_style = space
 trim_trailing_whitespace = true
 insert_final_newline = true
+max_line_length = 120
 
 # XML based files
 [*.{xml,csproj,props,targets,ruleset,config,nuspec}]

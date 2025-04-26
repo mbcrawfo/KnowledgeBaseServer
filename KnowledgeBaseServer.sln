@@ -2,7 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6524429B-1313-4526-852D-13360071F3B5}"
 	ProjectSection(SolutionItems) = preProject
-		.csharpierrc = .csharpierrc
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
 		Directory.Build.props = Directory.Build.props
@@ -12,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.dockerignore = .dockerignore
 		global.json = global.json
 		.gitattributes = .gitattributes
+		.csharpierignore = .csharpierignore
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2162A920-E15A-42C5-8CF0-E066D886D1B1}"

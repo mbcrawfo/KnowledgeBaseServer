@@ -1,15 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
-
     <ItemGroup>
-      <ProjectReference Include="..\..\src\KnowledgeBaseServer\KnowledgeBaseServer.csproj" />
+        <ProjectReference Include="..\..\src\KnowledgeBaseServer\KnowledgeBaseServer.csproj" />
     </ItemGroup>
-
     <ItemGroup>
-      <PackageReference Include="Bogus" />
+        <PackageReference Include="Bogus" />
     </ItemGroup>
-
 </Project>
