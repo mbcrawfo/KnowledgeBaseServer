@@ -22,7 +22,15 @@ public static class GetMemoryByIdTool
 
         var memory = connection.QuerySingleOrDefault<MemoryDto>(
             sql: """
-            select mn.id, mn.created, t.name as topic, mn.content, mn.context, mn.outdated, mn.outdated_reason
+            select
+                mn.id,
+                mn.created,
+                t.name as topic,
+                mn.content,
+                mn.importance,
+                mn.context,
+                mn.outdated,
+                mn.outdated_reason
             from memory_nodes mn
             inner join topics t on t.id = mn.topic_id
             where mn.id = @Id
@@ -42,7 +50,15 @@ public static class GetMemoryByIdTool
 
         var linkedMemories = connection.Query<MemoryDto>(
             sql: """
-            select mn.id, mn.created, t.name as topic, mn.content, mn.context, mn.outdated, mn.outdated_reason
+            select
+                mn.id,
+                mn.created,
+                t.name as topic,
+                mn.content,
+                mn.importance,
+                mn.context,
+                mn.outdated,
+                mn.outdated_reason
             from memory_edges me
             inner join memory_nodes mn on mn.id = me.target_memory_node_id
             inner join topics t on t.id = mn.topic_id
@@ -57,6 +73,7 @@ public static class GetMemoryByIdTool
             memory.Created,
             memory.Topic,
             memory.Content,
+            memory.Importance,
             memory.Context,
             memory.Outdated,
             memory.OutdatedReason,

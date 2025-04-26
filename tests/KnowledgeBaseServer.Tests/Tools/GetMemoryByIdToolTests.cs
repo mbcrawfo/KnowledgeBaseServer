@@ -34,6 +34,7 @@ public class GetMemoryByIdToolTests : DatabaseTest
             memory.Created,
             topic.Name,
             memory.Content,
+            memory.Importance,
             context,
             memory.Outdated,
             memory.OutdatedReason
@@ -73,6 +74,7 @@ public class GetMemoryByIdToolTests : DatabaseTest
             memory.Created,
             topic.Name,
             memory.Content,
+            memory.Importance,
             context,
             memory.Outdated,
             memory.OutdatedReason,
@@ -82,6 +84,7 @@ public class GetMemoryByIdToolTests : DatabaseTest
                     m.Created,
                     topic.Name,
                     m.Content,
+                    m.Importance,
                     context,
                     m.Outdated,
                     m.OutdatedReason

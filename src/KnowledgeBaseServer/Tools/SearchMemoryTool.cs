@@ -52,7 +52,15 @@ public static class SearchMemoryTool
               from memory_search
               where memory_search match @Phrases
             )
-            select mn.id, mn.created, t.name as topic, mn.content, mn.context, mn.outdated, mn.outdated_reason
+            select
+                mn.id,
+                mn.created,
+                t.name as topic,
+                mn.content,
+                mn.importance,
+                mn.context,
+                mn.outdated,
+                mn.outdated_reason
             from search_results sr
             inner join memory_nodes mn on mn.id = sr.memory_node_id
             inner join topics t on t.id = mn.topic_id
