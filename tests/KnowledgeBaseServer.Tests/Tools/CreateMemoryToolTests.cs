@@ -54,12 +54,12 @@ public class CreateMemoryToolTests : DatabaseTest
         // assert
         using var connection = ConnectionString.CreateConnection();
         connection.GetTopics().ShouldHaveSingleItem().Name.ShouldBe(expectedTopic);
-        connection.GetMemoryContexts().ShouldHaveSingleItem().Value.ShouldBe(expectedContext);
         connection
             .GetMemoryNodes()
             .ShouldHaveSingleItem()
             .ShouldSatisfyAllConditions(
                 x => x.Content.ShouldBe(expectedMemory),
+                x => x.Context.ShouldBe(expectedContext),
                 x => x.Importance.ShouldBe(expectedImportance)
             );
     }
@@ -90,12 +90,12 @@ public class CreateMemoryToolTests : DatabaseTest
         // assert
         using var connection = ConnectionString.CreateConnection();
         connection.GetTopics().ShouldHaveSingleItem().Name.ShouldBe(expectedTopic.Name);
-        connection.GetMemoryContexts().ShouldHaveSingleItem().Value.ShouldBe(expectedContext);
         connection
             .GetMemoryNodes()
             .ShouldHaveSingleItem()
             .ShouldSatisfyAllConditions(
                 x => x.Content.ShouldBe(expectedMemory),
+                x => x.Context.ShouldBe(expectedContext),
                 x => x.Importance.ShouldBe(expectedImportance)
             );
     }
@@ -113,9 +113,11 @@ public class CreateMemoryToolTests : DatabaseTest
         // assert
         using var connection = ConnectionString.CreateConnection();
         connection.GetTopics().ShouldHaveSingleItem().Name.ShouldBe(topic);
-        connection.GetMemoryContexts().ShouldBeEmpty();
         connection.GetMemoryEdges().ShouldBeEmpty();
-        connection.GetMemoryNodes().ShouldHaveSingleItem().Content.ShouldBe(expectedMemory);
+        connection
+            .GetMemoryNodes()
+            .ShouldHaveSingleItem()
+            .ShouldSatisfyAllConditions(x => x.Content.ShouldBe(expectedMemory), x => x.Context.ShouldBeNull());
     }
 
     [Fact]
@@ -169,7 +171,6 @@ public class CreateMemoryToolTests : DatabaseTest
         result.ShouldBe("Invalid sourceMemoryNodeId provided.");
         using var connection = ConnectionString.CreateConnection();
         connection.GetTopics().ShouldBeEmpty();
-        connection.GetMemoryContexts().ShouldBeEmpty();
         connection.GetMemoryNodes().ShouldBeEmpty();
         connection.GetMemoryEdges().ShouldBeEmpty();
     }

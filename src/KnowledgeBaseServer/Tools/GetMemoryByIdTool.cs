@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel;
-using System.Text.Json;
 using Dapper;
 using KnowledgeBaseServer.Dtos;
 using ModelContextProtocol.Server;
@@ -23,10 +22,9 @@ public static class GetMemoryByIdTool
 
         var memory = connection.QuerySingleOrDefault<MemoryDto>(
             sql: """
-            select mn.id, mn.created, t.name as topic, mn.content, mc.value as context, mn.outdated, mn.outdated_reason
+            select mn.id, mn.created, t.name as topic, mn.content, mn.context, mn.outdated, mn.outdated_reason
             from memory_nodes mn
             inner join topics t on t.id = mn.topic_id
-            left outer join memory_contexts mc on mc.id = mn.context_id
             where mn.id = @Id
             """,
             new { Id = memoryNodeId }
@@ -44,11 +42,10 @@ public static class GetMemoryByIdTool
 
         var linkedMemories = connection.Query<MemoryDto>(
             sql: """
-            select mn.id, mn.created, t.name as topic, mn.content, mc.value as context, mn.outdated, mn.outdated_reason
+            select mn.id, mn.created, t.name as topic, mn.content, mn.context, mn.outdated, mn.outdated_reason
             from memory_edges me
             inner join memory_nodes mn on mn.id = me.target_memory_node_id
             inner join topics t on t.id = mn.topic_id
-            left outer join memory_contexts mc on mc.id = mn.context_id
             where me.source_memory_node_id = @Id
             order by mn.created
             """,

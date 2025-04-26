@@ -57,38 +57,19 @@ public static class CreateMemoryTool
             );
         }
 
-        Guid? contextId = null;
-        if (!string.IsNullOrEmpty(context))
-        {
-            contextId = Guid.CreateVersion7();
-            _ = connection.Execute(
-                sql: """
-                insert into memory_contexts (id, created, value) values
-                (@Id, @Created, @Value)
-                """,
-                new
-                {
-                    Id = contextId,
-                    Created = now,
-                    Value = context,
-                },
-                transaction
-            );
-        }
-
         var createdNode = new
         {
             Id = Guid.CreateVersion7(),
             Created = now,
             TopicId = topicId,
-            ContextId = contextId,
             Content = memory,
+            Context = context,
             Importance = importance,
         };
         _ = connection.Execute(
             sql: """
-            insert into memory_nodes (id, created, topic_id, context_id, content, importance) values
-            (@Id, @Created, @TopicId, @ContextId, @Content, @Importance)
+            insert into memory_nodes (id, created, topic_id, content, context, importance) values
+            (@Id, @Created, @TopicId, @Content, @Context, @Importance)
             """,
             createdNode,
             transaction

@@ -14,9 +14,9 @@ public sealed class MemoryNode
 
     public required Guid TopicId { get; init; }
 
-    public Guid? ContextId { get; init; }
-
     public required string Content { get; init; }
+
+    public string? Context { get; init; }
 
     public DateTimeOffset? Outdated { get; init; }
 
@@ -29,6 +29,7 @@ public sealed class MemoryNode
             .RuleFor(x => x.Id, Guid.CreateVersion7)
             .RuleFor(x => x.Created, f => f.Date.PastOffset())
             .RuleFor(x => x.Content, f => f.Lorem.Sentence())
+            .RuleFor(x => x.Context, f => f.Lorem.Sentence().OrNull(f))
             .RuleFor(x => x.Importance, f => f.Random.Double());
 }
 
@@ -37,8 +38,8 @@ public static partial class FakerExtensions
     public static Faker<MemoryNode> WithTopic(this Faker<MemoryNode> faker, Topic topic) =>
         faker.RuleFor(x => x.TopicId, topic.Id);
 
-    public static Faker<MemoryNode> WithContext(this Faker<MemoryNode> faker, MemoryContext context) =>
-        faker.RuleFor(x => x.ContextId, context.Id);
+    public static Faker<MemoryNode> WithContext(this Faker<MemoryNode> faker, string? context) =>
+        faker.RuleFor(x => x.Context, context);
 
     public static Faker<MemoryNode> WithOutdated(this Faker<MemoryNode> faker) =>
         faker
@@ -51,8 +52,8 @@ public static partial class DbConnectionExtensions
     public static void SeedMemoryNodes(this IDbConnection connection, IEnumerable<MemoryNode> memoryNodes)
     {
         const string sql = """
-            insert into memory_nodes (id, created, topic_id, context_id, content, outdated, outdated_reason, importance)
-            values (@Id, @Created, @TopicId, @ContextId, @Content, @Outdated, @OutdatedReason, @Importance)
+            insert into memory_nodes (id, created, topic_id, content, context, importance, outdated, outdated_reason)
+            values (@Id, @Created, @TopicId, @Content, @Context, @Importance, @Outdated, @OutdatedReason)
             """;
 
         connection.Execute(sql, memoryNodes);
@@ -68,7 +69,7 @@ public static partial class DbConnectionExtensions
     )
     {
         var sql = """
-            select id, created, topic_id, context_id, content, outdated, outdated_reason, importance
+            select id, created, topic_id, content, context, importance, outdated, outdated_reason
             from memory_nodes
             """;
         if (where is not null)

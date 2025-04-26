@@ -20,7 +20,7 @@ public class MigrationTests_V0_2_0 : MigrationTest
     public void ShouldMigrateToLatest()
     {
         // arrange
-        // Query data in the original v0.1.0 format.
+        // Query data in the original v0.2.0 format.
         List<TopicV020> originalTopics;
         List<MemoryContextV020> originalMemoryContexts;
         List<MemoryNodeV020> originalMemoryNodes;
@@ -65,17 +65,7 @@ public class MigrationTests_V0_2_0 : MigrationTest
                 );
         }
 
-        var migratedMemoryContexts = connection.GetMemoryContexts();
-        foreach (var originalMemoryContext in originalMemoryContexts)
-        {
-            migratedMemoryContexts
-                .FirstOrDefault(x => x.Id == originalMemoryContext.Id)
-                .ShouldNotBeNull()
-                .ShouldSatisfyAllConditions(
-                    x => x.Created.ShouldBe(originalMemoryContext.Created),
-                    x => x.Value.ShouldBe(originalMemoryContext.Value)
-                );
-        }
+        // v0.3.1: memory_contexts table removed.
 
         var migratedMemoryNodes = connection.GetMemoryNodes();
         foreach (var originalMemoryNode in originalMemoryNodes)
@@ -86,11 +76,24 @@ public class MigrationTests_V0_2_0 : MigrationTest
                 .ShouldSatisfyAllConditions(
                     x => x.Created.ShouldBe(originalMemoryNode.Created),
                     x => x.TopicId.ShouldBe(originalMemoryNode.TopicId),
-                    x => x.ContextId.ShouldBe(originalMemoryNode.ContextId),
                     x => x.Content.ShouldBe(originalMemoryNode.Content),
+                    // v0.3.1: Context moved inline to memory_nodes table.
+                    x =>
+                    {
+                        if (originalMemoryNode.ContextId is null)
+                        {
+                            x.Context.ShouldBeNull();
+                        }
+                        else
+                        {
+                            x.Context.ShouldBe(
+                                originalMemoryContexts.Single(mc => mc.Id == originalMemoryNode.ContextId).Value
+                            );
+                        }
+                    },
+                    x => x.Importance.ShouldBe(originalMemoryNode.Importance),
                     x => x.Outdated.ShouldBe(originalMemoryNode.Outdated),
-                    x => x.OutdatedReason.ShouldBe(originalMemoryNode.OutdatedReason),
-                    x => x.Importance.ShouldBe(originalMemoryNode.Importance)
+                    x => x.OutdatedReason.ShouldBe(originalMemoryNode.OutdatedReason)
                 );
         }
 

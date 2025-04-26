@@ -11,7 +11,6 @@ namespace KnowledgeBaseServer.Tests.Tools;
 public class GetMemoryByIdToolTests : DatabaseTest
 {
     private readonly Faker _faker = new();
-    private readonly Faker<MemoryContext> _memoryContextFaker = MemoryContext.Faker();
     private readonly Faker<MemoryEdge> _memoryEdgeFaker = MemoryEdge.Faker();
     private readonly Faker<MemoryNode> _memoryNodeFaker = MemoryNode.Faker();
     private readonly Faker<Topic> _topicFaker = Topic.Faker();
@@ -21,13 +20,12 @@ public class GetMemoryByIdToolTests : DatabaseTest
     {
         // arrange
         var topic = _topicFaker.Generate();
-        var context = _memoryContextFaker.Generate();
+        var context = _faker.Lorem.Sentence();
         var memory = _memoryNodeFaker.WithTopic(topic).WithContext(context).WithOutdated().Generate();
 
         using (var seedConnection = ConnectionString.CreateConnection())
         {
             seedConnection.SeedTopic(topic);
-            seedConnection.SeedMemoryContext(context);
             seedConnection.SeedMemoryNode(memory);
         }
 
@@ -36,7 +34,7 @@ public class GetMemoryByIdToolTests : DatabaseTest
             memory.Created,
             topic.Name,
             memory.Content,
-            context.Value,
+            context,
             memory.Outdated,
             memory.OutdatedReason
         );
@@ -55,7 +53,7 @@ public class GetMemoryByIdToolTests : DatabaseTest
     {
         // arrange
         var topic = _topicFaker.Generate();
-        var context = _memoryContextFaker.Generate();
+        var context = _faker.Lorem.Sentence();
         var memory = _memoryNodeFaker.WithTopic(topic).WithContext(context).WithOutdated().Generate();
         // The topic and context persist on the faker.
         var linkedMemories = _memoryNodeFaker.Generate(3);
@@ -66,7 +64,6 @@ public class GetMemoryByIdToolTests : DatabaseTest
         using (var seedConnection = ConnectionString.CreateConnection())
         {
             seedConnection.SeedTopic(topic);
-            seedConnection.SeedMemoryContext(context);
             seedConnection.SeedMemoryNodes([memory, .. linkedMemories]);
             seedConnection.SeedMemoryEdges(memoryEdges);
         }
@@ -76,7 +73,7 @@ public class GetMemoryByIdToolTests : DatabaseTest
             memory.Created,
             topic.Name,
             memory.Content,
-            context.Value,
+            context,
             memory.Outdated,
             memory.OutdatedReason,
             linkedMemories
@@ -85,7 +82,7 @@ public class GetMemoryByIdToolTests : DatabaseTest
                     m.Created,
                     topic.Name,
                     m.Content,
-                    context.Value,
+                    context,
                     m.Outdated,
                     m.OutdatedReason
                 ))
