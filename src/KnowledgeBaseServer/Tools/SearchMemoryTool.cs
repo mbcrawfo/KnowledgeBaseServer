@@ -23,7 +23,8 @@ public static class SearchMemoryTool
         ConnectionString connectionString,
         [Description("Phrases to search for. Maximum length: 5")] string[] phrases,
         [Description("Optionally limits the search to certain topics. Maximum length: 5")] string[]? topics = null,
-        [Description("The maximum number of memories to return. Default: 5, Maximum value: 50")] int maxResults = 5
+        [Description("The maximum number of memories to return. Default: 5, Maximum value: 50")] int maxResults = 5,
+        [Description("Excludes memories that are outdated. Default: false")] bool excludeOutdated = false
     )
     {
         topics ??= [];
@@ -67,9 +68,21 @@ public static class SearchMemoryTool
             """
         );
 
-        if (topics is { Length: > 0 })
+        if (topics.Length > 0 || excludeOutdated)
         {
-            sb.AppendLine().AppendLine("where t.name in @Topics");
+            sb.AppendLine().Append("where ");
+
+            if (topics is { Length: > 0 })
+            {
+                sb.Append("t.name in @Topics");
+            }
+
+            if (excludeOutdated)
+            {
+                sb.Append(" mn.outdated is null");
+            }
+
+            sb.AppendLine();
         }
 
         sb.AppendLine()

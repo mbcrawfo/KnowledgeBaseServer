@@ -1,3 +1,4 @@
+using System.Linq;
 using Bogus;
 using KnowledgeBaseServer.Dtos;
 using KnowledgeBaseServer.Tools;
@@ -215,12 +216,41 @@ public class SearchMemoryToolTests : DatabaseTest
         // assert
         results.Length.ShouldBe(2);
 
-        // Since we're using a weighted approach (70% rank, 30% importance),
+        // Since we're using a weighted approach,
         // the result ordering will depend on how SQLite FTS5 ranks these specific phrases
         // and how the weighting is applied. This test verifies that both factors
         // are considered, but the exact order depends on the specific weights used.
         // We expect both memories to be returned in the results.
         results.ShouldContain(m => m.Id == highRelevanceLowImportanceId);
         results.ShouldContain(m => m.Id == moderateRelevanceHighImportanceId);
+    }
+
+    [Fact]
+    public void ShouldReturnOnlyNonOutdatedMemories_WhenExcludingOutdated()
+    {
+        // arrange
+        var searchPhrase = _faker.Lorem.Word();
+
+        var memoryIds = _faker
+            .Make(count: 3, () => _faker.Lorem.Sentence() + searchPhrase)
+            .Select(m =>
+                AppJsonSerializer
+                    .Deserialize<CreatedMemoryDto>(CreateMemoryTool.Handle(ConnectionString, _faker.Lorem.Word(), m))
+                    .Id
+            )
+            .ToArray();
+        var outdatedMemoryId = _faker.PickRandom(memoryIds);
+
+        _ = MarkMemoryAsOutdatedTool.Handle(ConnectionString, outdatedMemoryId, _faker.Lorem.Sentence());
+
+        var expectedMemoryIds = memoryIds.Where(id => id != outdatedMemoryId).ToArray();
+
+        // act
+        var result = AppJsonSerializer.Deserialize<MemoryDto[]>(
+            SearchMemoryTool.Handle(ConnectionString, [searchPhrase], excludeOutdated: true)
+        );
+
+        // assert
+        result.Select(m => m.Id).ShouldBe(expectedMemoryIds, ignoreOrder: true);
     }
 }
