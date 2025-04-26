@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Dapper;
 using KnowledgeBaseServer.Tests.Data;
-using Microsoft.Extensions.Logging;
 using Shouldly;
 using Xunit;
 
@@ -13,13 +12,9 @@ namespace KnowledgeBaseServer.Tests.DatabaseMigrationTests;
 // ReSharper disable once InconsistentNaming
 public class MigrationTests_V0_2_0 : MigrationTest
 {
-    private readonly ILoggerFactory _loggerFactory = LoggerFactory.Create(b =>
-        b.AddConsole().SetMinimumLevel(LogLevel.Trace)
-    );
-
     /// <inheritdoc />
-    public MigrationTests_V0_2_0()
-        : base("v0.2.0") { }
+    public MigrationTests_V0_2_0(ITestOutputHelper outputHelper)
+        : base("v0.2.0", outputHelper) { }
 
     [Fact(DisplayName = "v0.2.0 database should migrate to latest version")]
     public void ShouldMigrateToLatest()
@@ -44,7 +39,7 @@ public class MigrationTests_V0_2_0 : MigrationTest
         }
 
         // act
-        var result = Migrator.ApplyMigrations(_loggerFactory, ConnectionString);
+        var result = Migrator.ApplyMigrations(LogFactory, ConnectionString);
 
         // assert
         result.ShouldBeTrue();
