@@ -65,7 +65,7 @@ public class MigrationTests_V0_2_0 : MigrationTest
                 );
         }
 
-        // v0.3.1: memory_contexts table removed.
+        // v0.4.0: memory_contexts table removed.
 
         var migratedMemoryNodes = connection.GetMemoryNodes();
         foreach (var originalMemoryNode in originalMemoryNodes)
@@ -77,7 +77,7 @@ public class MigrationTests_V0_2_0 : MigrationTest
                     x => x.Created.ShouldBe(originalMemoryNode.Created),
                     x => x.TopicId.ShouldBe(originalMemoryNode.TopicId),
                     x => x.Content.ShouldBe(originalMemoryNode.Content),
-                    // v0.3.1: Context moved inline to memory_nodes table.
+                    // v0.4.0: Context moved inline to memory_nodes table.
                     x =>
                     {
                         if (originalMemoryNode.ContextId is null)
