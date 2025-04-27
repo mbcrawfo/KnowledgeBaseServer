@@ -31,60 +31,28 @@ public static class CreateMemoryTool
         using var connection = connectionString.CreateConnection();
         using var transaction = connection.BeginTransaction();
 
-        var topicId = connection.QuerySingleOrDefault<Guid>(
+        var newMemoryNodeId = connection.QuerySingle<Guid>(
             sql: """
-            select id
-            from topics
-            where name = @Name
-            """,
-            new { Name = topic }
-        );
-        if (topicId == Guid.Empty)
-        {
-            topicId = Guid.CreateVersion7();
-            _ = connection.Execute(
-                sql: """
-                insert into topics (id, created, name) values
-                (@Id, @Created, @Name)
-                """,
-                new
-                {
-                    Id = topicId,
-                    Created = now,
-                    Name = topic,
-                },
-                transaction
-            );
-        }
+            insert into topics (id, created, name) values
+                (@TopicId, @Now, @Topic)
+            on conflict (name) do nothing;
 
-        var createdNode = new
-        {
-            Id = Guid.CreateVersion7(),
-            Created = now,
-            TopicId = topicId,
-            Content = memory,
-            Context = context,
-            Importance = importance,
-        };
-        _ = connection.Execute(
-            sql: """
             insert into memory_nodes (id, created, topic_id, content, context, importance) values
-            (@Id, @Created, @TopicId, @Content, @Context, @Importance)
-            """,
-            createdNode,
-            transaction
-        );
+                (@MemoryNodeId, @Now, (select id from topics where name = @Topic), @Content, @Context, @Importance)
+            returning id;
 
-        _ = connection.Execute(
-            sql: """
             insert into memory_search (memory_node_id, memory_content, memory_context) values
-            (@MemoryId, @Content, @Context)
+                (@MemoryNodeId, @Content, @Context);
             """,
             new
             {
-                MemoryId = createdNode.Id,
+                TopicId = Guid.CreateVersion7(),
+                Now = now,
+                Topic = topic,
+                MemoryNodeId = Guid.CreateVersion7(),
                 Content = memory,
                 Context = context,
+                Importance = importance,
             },
             transaction
         );
@@ -93,7 +61,7 @@ public static class CreateMemoryTool
         {
             try
             {
-                _ = connection.ConnectMemoriesInternal(transaction, sourceMemoryNodeId.Value, [createdNode.Id], now);
+                _ = connection.ConnectMemoriesInternal(transaction, sourceMemoryNodeId.Value, [newMemoryNodeId], now);
             }
             catch (SqliteException ex) when (ex.IsForeignKeyConstraintViolation())
             {
@@ -103,6 +71,6 @@ public static class CreateMemoryTool
 
         transaction.Commit();
 
-        return AppJsonSerializer.Serialize(new CreatedMemoryDto(createdNode.Id, createdNode.Content));
+        return AppJsonSerializer.Serialize(new CreatedMemoryDto(newMemoryNodeId, memory));
     }
 }
