@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Bogus;
 using KnowledgeBaseServer.Dtos;
@@ -88,7 +90,12 @@ public class SearchMemoryToolTests : DatabaseTest
         {
             foreach (var m in _faker.Make(count: 3, () => _faker.Lorem.Sentence()))
             {
-                _ = CreateMemoryTool.Handle(ConnectionString, topic, m, context: _faker.Lorem.Sentence());
+                _ = CreateMemoryTool.Handle(
+                    ConnectionString,
+                    topic,
+                    m + searchPhrase,
+                    context: _faker.Lorem.Sentence()
+                );
             }
         }
 
@@ -100,7 +107,8 @@ public class SearchMemoryToolTests : DatabaseTest
         );
 
         // assert
-        result.ShouldAllBe(m => m.Topic == expectedTopic);
+        result.Length.ShouldBe(3);
+        result.ShouldAllBe(x => x.Topic == expectedTopic);
     }
 
     [Fact]
@@ -252,5 +260,40 @@ public class SearchMemoryToolTests : DatabaseTest
 
         // assert
         result.Select(m => m.Id).ShouldBe(expectedMemoryIds, ignoreOrder: true);
+    }
+
+    [Fact]
+    public void ShouldFilterResults_WhenFilteringByTopicAndExcludingOutdated()
+    {
+        // arrange
+        var topics = _faker.Lorem.Words();
+        var searchPhrase = _faker.Lorem.Word();
+        var memoryIdsByTopic = new Dictionary<string, List<Guid>>();
+
+        foreach (var topic in topics)
+        {
+            memoryIdsByTopic[topic] = new List<Guid>();
+
+            foreach (var m in _faker.Make(count: 3, () => _faker.Lorem.Sentence()))
+            {
+                var memory = AppJsonSerializer.Deserialize<CreatedMemoryDto>(
+                    CreateMemoryTool.Handle(ConnectionString, topic, m + searchPhrase, context: _faker.Lorem.Sentence())
+                );
+                memoryIdsByTopic[topic].Add(memory.Id);
+            }
+        }
+
+        var searchTopic = _faker.PickRandom(topics);
+        var outdatedMemoryId = _faker.PickRandom(memoryIdsByTopic[searchTopic]);
+        _ = MarkMemoryAsOutdatedTool.Handle(ConnectionString, outdatedMemoryId, _faker.Lorem.Sentence());
+        var expectedMemoryIds = memoryIdsByTopic[searchTopic].Where(id => id != outdatedMemoryId).ToArray();
+
+        // act
+        var result = AppJsonSerializer.Deserialize<MemoryDto[]>(
+            SearchMemoryTool.Handle(ConnectionString, [searchPhrase], [searchTopic], excludeOutdated: true)
+        );
+
+        // assert
+        result.Select(x => x.Id).ShouldBe(expectedMemoryIds, ignoreOrder: true);
     }
 }

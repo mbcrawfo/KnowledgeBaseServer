@@ -72,13 +72,18 @@ public static class SearchMemoryTool
         {
             sb.AppendLine().Append("where ");
 
-            if (topics is { Length: > 0 })
+            if (topics.Length > 0)
             {
                 sb.Append("t.name in @Topics");
             }
 
             if (excludeOutdated)
             {
+                if (topics.Length > 0)
+                {
+                    sb.Append(" and ");
+                }
+
                 sb.Append(" mn.outdated is null");
             }
 
