@@ -18,7 +18,7 @@ public sealed class Topic
         new Faker<Topic>()
             .RuleFor(x => x.Id, Guid.CreateVersion7)
             .RuleFor(x => x.Created, f => f.Date.PastOffset())
-            .RuleFor(x => x.Name, f => f.Lorem.Sentence(3));
+            .RuleFor(x => x.Name, f => f.Lorem.Sentence());
 }
 
 public static partial class DbConnectionExtensions

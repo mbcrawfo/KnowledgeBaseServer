@@ -83,7 +83,7 @@ public class SearchMemoryToolTests : DatabaseTest
     public void ShouldFilterMatchingMemoriesByTopic_WhenTopicsAreProvided()
     {
         // arrange
-        var topics = _faker.Lorem.Words();
+        var topics = _faker.MakeUnique(f => f.Lorem.Word()).Take(3).ToArray();
         var searchPhrase = _faker.Lorem.Word();
 
         foreach (var topic in topics)
@@ -266,7 +266,7 @@ public class SearchMemoryToolTests : DatabaseTest
     public void ShouldFilterResults_WhenFilteringByTopicAndExcludingOutdated()
     {
         // arrange
-        var topics = _faker.Lorem.Words();
+        var topics = _faker.MakeUnique(f => f.Lorem.Word()).Take(3).ToArray();
         var searchPhrase = _faker.Lorem.Word();
         var memoryIdsByTopic = new Dictionary<string, List<Guid>>();
 
